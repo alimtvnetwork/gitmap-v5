@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // runGroupCreate handles "group create <name>".

@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // LoadCDDefaults reads the cd-defaults.json config file.

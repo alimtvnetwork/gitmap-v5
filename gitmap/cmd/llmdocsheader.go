@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // writeLLMHeader writes the document title and intro.

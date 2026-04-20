@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/mapper"
-	"github.com/user/gitmap/model"
-	"github.com/user/gitmap/scanner"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/mapper"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/scanner"
 )
 
 // runAs implements `gitmap as [alias-name] [--force]`.

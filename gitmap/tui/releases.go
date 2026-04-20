@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/model"
-	"github.com/user/gitmap/store"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/store"
 )
 
 type releasesModel struct {

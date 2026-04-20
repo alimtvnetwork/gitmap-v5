@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/formatter"
-	"github.com/user/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/formatter"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
 )
 
 // CloneFromFile reads a source file and clones all repos under targetDir.

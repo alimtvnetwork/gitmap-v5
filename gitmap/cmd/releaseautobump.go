@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/release"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/release"
 )
 
 // peekNextMinorVersion reads .gitmap/release/latest.json (falling back to

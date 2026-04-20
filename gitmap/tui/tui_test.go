@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/user/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
 )
 
 func testRepos() []model.ScanRecord {

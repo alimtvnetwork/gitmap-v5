@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // FailureRecord stores details about a single failed batch item.

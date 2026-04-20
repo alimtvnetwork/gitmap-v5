@@ -4,8 +4,8 @@ import (
 	"encoding/csv"
 	"io"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
 )
 
 // WriteCSV writes records to the given writer in CSV format.

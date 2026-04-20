@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/verbose"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/verbose"
 )
 
 // executeUpdate writes a temp script and runs it.

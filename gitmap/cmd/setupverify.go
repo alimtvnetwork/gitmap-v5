@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/user/gitmap/completion"
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/completion"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // verifyShellWrapper checks if the shell wrapper is active after setup.

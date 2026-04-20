@@ -3,7 +3,7 @@ package tui
 import (
 	"fmt"
 
-	"github.com/user/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
 )
 
 // formatRelRow renders a single release list row.

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // InstalledTool represents a tracked tool installation.

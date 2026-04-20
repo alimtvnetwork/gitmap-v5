@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // PrintFailureReport outputs a detailed list of failed items after a batch

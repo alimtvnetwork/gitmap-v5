@@ -3,7 +3,7 @@ package cmd
 import (
 	"flag"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // parseScanFlags parses flags for the scan command.

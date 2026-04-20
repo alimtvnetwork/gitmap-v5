@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // GitSetupConfig holds the full git-setup.json structure.

@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // AppendPinnedInstallSnippet returns the release body with a markdown

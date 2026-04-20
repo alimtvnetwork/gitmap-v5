@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/store"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/store"
 )
 
 // runSSHCat displays the public key for a named SSH key.

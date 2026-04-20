@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/user/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
 )
 
 // formatTRRow renders a single temp-release list row.

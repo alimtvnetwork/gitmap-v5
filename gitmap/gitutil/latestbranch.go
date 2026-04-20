@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // RemoteBranchInfo holds commit metadata for a remote-tracking branch.

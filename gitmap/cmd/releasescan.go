@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/release"
-	"github.com/user/gitmap/scanner"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/release"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/scanner"
 )
 
 // scanReleaseTarget represents one repo discovered by the scan-dir release

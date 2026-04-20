@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
 )
 
 // CollectOptions holds user-facing flags for data collection.

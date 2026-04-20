@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/release"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/release"
 )
 
 func TestShouldPrintInstallHint_GitmapRepos(t *testing.T) {

@@ -5,8 +5,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/verbose"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/verbose"
 )
 
 // Rollback deletes a local branch and tag after a failed push.
