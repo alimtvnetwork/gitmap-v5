@@ -1,5 +1,24 @@
 # Changelog
 
+## v3.32.0 — (2026-04-20) — Scan output: hoist common base path, show filenames only
+
+### Changed
+
+- **`gitmap scan` Output Artifacts section** is now scannable in one glance. The common base directory (e.g. `D:\wp-work\riseup-asia\.gitmap\output\`) is printed once under the section header as `📂 Base: <path>`, and each artifact line shows only the filename (`gitmap.csv`, `clone.ps1`, …) instead of repeating the full absolute path on every row. Same for `💾 Cache` (rescan).
+- Aligned the icon column widths so filenames line up vertically across CSV / JSON / Text list / Structure / Clone PS1 / HTTPS PS1 / SSH PS1 / Desktop PS1 / Cache rows.
+
+### Implementation
+
+- `gitmap/constants/constants_messages.go` — `MsgSectionArtifacts` now takes a `%s` for the base dir; `MsgCSVWritten`/`MsgJSONWritten`/`MsgTextWritten`/`MsgStructureWritten`/`MsgCloneScript`/`MsgDirectClone`/`MsgDirectCloneSSH`/`MsgDesktopScript`/`MsgScanCacheSaved` re-aligned to a uniform 12-char label column.
+- `gitmap/cmd/scan.go` — `fmt.Print(MsgSectionArtifacts)` → `fmt.Printf(MsgSectionArtifacts, outputDir)`.
+- `gitmap/cmd/scanoutput.go` — every per-file `fmt.Printf(MsgXxx, path)` now passes `filepath.Base(path)`.
+- `gitmap/cmd/rescan.go` — same `filepath.Base(path)` change for the cache line.
+
+### Compatibility
+
+- Pure formatting change; no flag, file, or DB schema impact. Project Detection section was already filename-only and is unchanged.
+
+
 ## v3.31.0 — (2026-04-20) — Cross-dir release/clone-next, has-change command, SSH existing-key fix
 
 ### Added
