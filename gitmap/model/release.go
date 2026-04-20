@@ -2,9 +2,10 @@
 package model
 
 // ReleaseRecord holds release metadata stored in the database.
-// v15: boolean fields use the IsX prefix convention.
+// v17: RepoId FK to Repo.RepoId (see spec/04-generic-cli/24-release-repo-relationship.md).
 type ReleaseRecord struct {
 	ID           int64  `json:"id"`
+	RepoID       int64  `json:"repoId"`
 	Version      string `json:"version"`
 	Tag          string `json:"tag"`
 	Branch       string `json:"branch"`

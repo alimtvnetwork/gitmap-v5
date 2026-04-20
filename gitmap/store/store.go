@@ -111,12 +111,17 @@ func (db *DB) Migrate() error {
 		return fmt.Errorf(constants.ErrV15Phase5Migration, err)
 	}
 
+	if err := db.migrateV15Phase6(); err != nil {
+		return fmt.Errorf(constants.ErrV15Phase6Migration, err)
+	}
+
 	statements := []string{
 		constants.SQLCreateRepo,
 		constants.SQLCreateAbsPathIndex,
 		constants.SQLCreateGroup,
 		constants.SQLCreateGroupRepo,
 		constants.SQLCreateRelease,
+		constants.SQLCreateReleaseRepoIdIndex,
 		constants.SQLCreateCommitTemplate,
 		constants.SQLCreateAmendment,
 		constants.SQLCreateCommandHistory,
