@@ -19,6 +19,8 @@
 
 - **`.lovable/prompts/01-read-prompt.md` overwrite** — New onboarding prompt with structured Phase 1–4 flow and mandatory deep-dive source specs lookup table.
 
+## v3.12.1 — (2026-04-20) — AST registry parity + spec cross-links + legacy-field test cleanup
+
 ### Added
 
 - **AST-derived `topLevelCmds()` registry parity test** — `gitmap/constants/cmd_constants_parity_test.go` adds `TestTopLevelCmdRegistryMatchesAST`, which uses `go/parser` to walk every `gitmap/constants/constants_*.go`, collects every `Cmd*` constant declared inside a `// gitmap:cmd top-level` block (minus those tagged `// gitmap:cmd skip`), and asserts the resulting set is exactly equal to the manual `topLevelCmds()` registry consumed by `TestTopLevelCmdConstantsAreUnique` / `TestTopLevelCmdAliasesAreUnique`. The registry can no longer drift silently — adding a new top-level `Cmd*` without registering it (or vice versa) fails CI with a clear "missing from registry" / "registered but not declared" diff.
