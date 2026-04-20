@@ -9,6 +9,9 @@ r
 ## Usage
 
     gitmap release [version] [flags]
+    gitmap r                          # bare: auto-bump MINOR + prompt
+    gitmap r -y                       # bare: auto-bump MINOR + skip prompt
+    gitmap r                          # from a parent dir: multi-repo batch
 
 ## Flags
 
@@ -49,6 +52,82 @@ the release branch is found, the command warns and prompts:
 
 Answering `y` removes the stale JSON file and proceeds with the release.
 Answering `n` (or pressing Enter) aborts the release.
+
+## Auto-bump (bare release, v3.19.0+)
+
+When `gitmap release` (alias `r`) is invoked with **no version argument and
+no `--bump` / `--commit` / `--branch` flag**, gitmap auto-increments the
+**MINOR** segment of the last release. Behaviour depends on the cwd:
+
+- **Inside a git repo** — reads `.gitmap/release/latest.json` (falling back
+  to the highest local `v*` tag), computes `vX.(Y+1).0`, prints the
+  proposal, and prompts `Proceed with this release? [y/N]`. `-y` skips the
+  prompt.
+- **From a directory containing many git repos** (cwd is NOT itself a git
+  repo) — walks the tree with `scanner.ScanDir`, keeps only repos that
+  already have a `.gitmap/release/latest.json`, prints a single summary
+  table of the planned bumps, prompts ONCE for the whole batch, then runs
+  each release sequentially. Failures are aggregated; the batch keeps
+  going. `-y` skips the batch prompt.
+
+Patch resets to `0` on a minor bump (`v3.4.7 → v3.5.0`). Any explicit
+`--bump` / `--version` / `--commit` / `--branch` argument suppresses
+auto-bump entirely, so existing scripted invocations are unaffected.
+
+### Bare auto-bump example (single repo, with prompt)
+
+    gitmap r
+
+**Output:**
+
+      Auto-bump: v3.18.0 → v3.19.0 (minor)
+      Proceed with this release? [y/N]: y
+    Creating branch release/v3.19.0... done
+    Creating tag v3.19.0... done
+    Pushing branch and tag... done
+    ✓ Metadata written to .gitmap/release/v3.19.0.json
+    ✓ Released v3.19.0
+
+### Bare auto-bump example (single repo, `-y` skips prompt)
+
+    gitmap r -y
+
+**Output:**
+
+      Auto-bump: v3.18.0 → v3.19.0 (minor)
+      → -y supplied; proceeding without prompt.
+    Creating branch release/v3.19.0... done
+    ...
+    ✓ Released v3.19.0
+
+### Multi-repo batch example (cwd has child git repos)
+
+    cd ~/code            # contains api/, web/, cli/  — each its own git repo
+    gitmap r
+
+**Output:**
+
+      Auto-bump 3 repo(s) with prior releases:
+        • api   v1.4.2 → v1.5.0
+        • cli   v0.7.0 → v0.8.0
+        • web   v2.1.0 → v2.2.0
+
+      Proceed with all releases? [y/N]: y
+
+      ── Releasing api → v1.5.0 ──
+    ✓ Released v1.5.0
+
+      ── Releasing cli → v0.8.0 ──
+    ✓ Released v0.8.0
+
+      ── Releasing web → v2.2.0 ──
+    ✓ Released v2.2.0
+
+      ✓ All 3 release(s) complete.
+
+Repos without a prior `latest.json` are silently skipped (first-time
+releases must still be created explicitly with a version argument). Add
+`-y` to skip the batch prompt for unattended automation.
 
 ## Examples
 
