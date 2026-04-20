@@ -6,14 +6,14 @@
 
 **Git repository scanner, manager, and navigator CLI**
 
-[![CI](https://github.com/alimtvnetwork/gitmap-v4/actions/workflows/ci.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v4/actions/workflows/ci.yml)
-[![golangci-lint](https://github.com/alimtvnetwork/gitmap-v4/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/alimtvnetwork/gitmap-v4/actions/workflows/ci.yml)
-[![Vulncheck](https://github.com/alimtvnetwork/gitmap-v4/actions/workflows/vulncheck.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v4/actions/workflows/vulncheck.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/alimtvnetwork/gitmap-v4?style=flat-square&label=version)](https://github.com/alimtvnetwork/gitmap-v4/releases)
+[![CI](https://github.com/alimtvnetwork/gitmap-v5/actions/workflows/ci.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v5/actions/workflows/ci.yml)
+[![golangci-lint](https://github.com/alimtvnetwork/gitmap-v5/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/alimtvnetwork/gitmap-v5/actions/workflows/ci.yml)
+[![Vulncheck](https://github.com/alimtvnetwork/gitmap-v5/actions/workflows/vulncheck.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v5/actions/workflows/vulncheck.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/alimtvnetwork/gitmap-v5?style=flat-square&label=version)](https://github.com/alimtvnetwork/gitmap-v5/releases)
 [![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)](https://github.com/alimtvnetwork/gitmap-v4)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)](https://github.com/alimtvnetwork/gitmap-v5)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](./LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/alimtvnetwork/gitmap-v4?style=flat-square)](https://goreportcard.com/report/github.com/alimtvnetwork/gitmap-v4)
+[![Go Report Card](https://goreportcard.com/badge/github.com/alimtvnetwork/gitmap-v5?style=flat-square)](https://goreportcard.com/report/github.com/alimtvnetwork/gitmap-v5)
 
 _Scan, catalog, clone, and manage all your Git repositories from a single CLI._
 
@@ -154,13 +154,13 @@ curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v5/main/gitmap
 **Specific version install (one-liner):**
 
 ```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v4/main/gitmap/scripts/install.ps1 | iex; Install-Gitmap -Version "v2.51.0"
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v5/main/gitmap/scripts/install.ps1 | iex; Install-Gitmap -Version "v2.51.0"
 ```
 
 **Specific version + custom directory (one-liner):**
 
 ```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v4/main/gitmap/scripts/install.ps1 | iex; Install-Gitmap -Version "v2.51.0" -InstallDir "D:\DevTools\gitmap"
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v5/main/gitmap/scripts/install.ps1 | iex; Install-Gitmap -Version "v2.51.0" -InstallDir "D:\DevTools\gitmap"
 ```
 
 **Custom directory install (downloaded script):**
@@ -178,7 +178,7 @@ irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v4/main/gitmap/script
 **Linux / macOS — specific version:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v4/main/gitmap/scripts/install.sh | sh -s -- --version v2.51.0
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v5/main/gitmap/scripts/install.sh | sh -s -- --version v2.51.0
 ```
 
 > **Tip:** Use `gitmap list-versions` to see all available release versions before pinning.
@@ -186,8 +186,8 @@ curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v4/main/gitmap
 ### Clone & Setup (Development)
 
 ```bash
-git clone https://github.com/alimtvnetwork/gitmap-v4.git
-cd gitmap-v4
+git clone https://github.com/alimtvnetwork/gitmap-v5.git
+cd gitmap-v5
 ./setup.sh
 ```
 
@@ -252,10 +252,10 @@ gitmap clone ./gitmap-output/gitmap.json --safe-pull
 gitmap clone ./gitmap-output/gitmap.json --github-desktop
 
 # clone a single repo by URL (auto-flattens versioned URLs)
-gitmap clone https://github.com/alimtvnetwork/gitmap-v4
-gitmap clone https://github.com/alimtvnetwork/gitmap-v4 my-folder
-gitmap clone git@github.com:alimtvnetwork/gitmap-v4.git my-folder
-gitmap clone https://github.com/alimtvnetwork/gitmap-v4 --replace   # see spec 96
+gitmap clone https://github.com/alimtvnetwork/gitmap-v5
+gitmap clone https://github.com/alimtvnetwork/gitmap-v5 my-folder
+gitmap clone git@github.com:alimtvnetwork/gitmap-v5.git my-folder
+gitmap clone https://github.com/alimtvnetwork/gitmap-v5 --replace   # see spec 96
 
 # clone-next: jump to the next (or specific) versioned sibling
 gitmap cn v++                                   # my-app-v3 -> my-app-v4
@@ -287,33 +287,33 @@ the result is committed + pushed back when the operation completes.
 
 ```bash
 # move: classic file copy + delete source
-gitmap mv ./gitmap-v4 ./gitmap-v4
-gitmap mv ./gitmap-v4 https://github.com/alimtvnetwork/gitmap-v4
-gitmap mv https://github.com/alimtvnetwork/gitmap-v4 ./another-folder
-gitmap mv https://github.com/alimtvnetwork/gitmap-v4 \
-         https://github.com/alimtvnetwork/gitmap-v4
+gitmap mv ./gitmap-v5 ./gitmap-v5
+gitmap mv ./gitmap-v5 https://github.com/alimtvnetwork/gitmap-v5
+gitmap mv https://github.com/alimtvnetwork/gitmap-v5 ./another-folder
+gitmap mv https://github.com/alimtvnetwork/gitmap-v5 \
+         https://github.com/alimtvnetwork/gitmap-v5
 
 # merge-both: bidirectional fill (each side gains what the other has)
-gitmap merge-both ./gitmap-v4 ./gitmap-v4
-gitmap merge-both ./gitmap-v4 https://github.com/alimtvnetwork/gitmap-v4
-gitmap merge-both https://github.com/alimtvnetwork/gitmap-v4 \
-                  https://github.com/alimtvnetwork/gitmap-v4
+gitmap merge-both ./gitmap-v5 ./gitmap-v5
+gitmap merge-both ./gitmap-v5 https://github.com/alimtvnetwork/gitmap-v5
+gitmap merge-both https://github.com/alimtvnetwork/gitmap-v5 \
+                  https://github.com/alimtvnetwork/gitmap-v5
 
 # merge-left: take RIGHT into LEFT
-gitmap merge-left ./gitmap-v4 ./gitmap-v4
-gitmap merge-left ./local https://github.com/alimtvnetwork/gitmap-v4
+gitmap merge-left ./gitmap-v5 ./gitmap-v5
+gitmap merge-left ./local https://github.com/alimtvnetwork/gitmap-v5
 
 # merge-right: take LEFT into RIGHT
-gitmap merge-right ./gitmap-v4 ./gitmap-v4
-gitmap merge-right ./local https://github.com/alimtvnetwork/gitmap-v4
+gitmap merge-right ./gitmap-v5 ./gitmap-v5
+gitmap merge-right ./local https://github.com/alimtvnetwork/gitmap-v5
 
 # bypass conflict prompts: source-side wins by default
-gitmap merge-right ./gitmap-v4 ./gitmap-v4 -y
-gitmap merge-both  ./gitmap-v4 ./gitmap-v4 -y --prefer-newer
+gitmap merge-right ./gitmap-v5 ./gitmap-v5 -y
+gitmap merge-both  ./gitmap-v5 ./gitmap-v5 -y --prefer-newer
 
 # pin remote branch + preview
 gitmap merge-right ./local https://github.com/owner/repo:develop
-gitmap mv ./gitmap-v4 ./gitmap-v4 --dry-run
+gitmap mv ./gitmap-v5 ./gitmap-v5 --dry-run
 ```
 
 Conflict prompt keys: **L**eft / **R**ight / **S**kip /
