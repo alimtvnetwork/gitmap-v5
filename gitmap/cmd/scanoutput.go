@@ -60,7 +60,7 @@ func writeJSONOutput(records []model.ScanRecord, outputDir string) {
 
 		return
 	}
-	fmt.Printf(constants.MsgJSONWritten, path)
+	fmt.Printf(constants.MsgJSONWritten, filepath.Base(path))
 }
 
 // writeTextOutput writes records as plain text clone commands.
