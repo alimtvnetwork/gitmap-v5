@@ -503,11 +503,13 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $deploy = "$env:SANDBOX_HOME\bin-run"
-          $appDir = Join-Path $deploy 'gitmap'
+          # v3.6.0+: run.ps1 deploys into gitmap-cli\ (renamed from gitmap\ to
+          # avoid visual collision with the binary name). See run.ps1 line ~671.
+          $appDir = Join-Path $deploy 'gitmap-cli'
           $bin    = Join-Path $appDir 'gitmap.exe'
           function Fail($msg) { Write-Host "::error::DFD regression: $msg"; exit 1 }
 
-          Write-Host "=== DFD-1: wrapped layout <root>\gitmap\gitmap.exe ==="
+          Write-Host "=== DFD-1: wrapped layout <root>\gitmap-cli\gitmap.exe ==="
           if (-not (Test-Path $appDir)) { Fail "DFD-1: missing wrapped folder $appDir" }
           if (-not (Test-Path $bin))    { Fail "DFD-1: missing binary $bin" }
 

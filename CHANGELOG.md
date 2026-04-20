@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.13.8 — (2026-04-20) — CI deploy-DFD Windows assertion aligned with gitmap-cli subdir
+
+### Fixed
+
+- **`.github/workflows/ci.yml`** — The `deploy-dfd` job's Windows DFD-1 assertion (line ~506) was hardcoded to check `$deploy\gitmap\gitmap.exe`, but `run.ps1` has deployed into `gitmap-cli\` since v3.6.0 (see `run.ps1` line 671: `$appDir = Join-Path $target "gitmap-cli"`). CI was failing with `DFD regression: DFD-1: missing wrapped folder D:\a\...\dfd-sandbox\bin-run\gitmap`. Updated the Windows assertion block to expect `gitmap-cli\` and added an inline comment pointing to the rename so the next reader sees the "why" immediately.
+
+### Why not Ubuntu
+
+The Ubuntu assertion (line ~448: `APP_DIR="$DEPLOY/gitmap"`) is intentionally left unchanged — `run.sh` (line 484, 688) still deploys into `gitmap/` on Unix. The `gitmap-cli` rename was Windows-only because on Windows the binary and the folder previously shared the exact same name (`gitmap.exe` inside `gitmap\`), which confused users and autocompletion. Unix has no such collision (`gitmap` binary inside `gitmap/` is unambiguous in a POSIX shell).
+
 ## v3.13.7 — (2026-04-20) — find-next const block tagged for completion generator
 
 ### Fixed
