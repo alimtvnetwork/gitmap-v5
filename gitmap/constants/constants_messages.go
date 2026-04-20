@@ -207,6 +207,7 @@ const (
 	ErrRescanNoCache            = "Error: no previous scan found. Run 'gitmap scan' first.\n%v\n"
 	ErrSetupLoadFailed          = "Error: could not load git-setup.json at %s: %v (operation: read)\n"
 	ErrStatusLoadFailed         = "Error: could not load gitmap.json at %s for status: %v (operation: read)\nRun 'gitmap scan' first.\n"
+	MsgStatusNoData             = "No tracked repos found.\nRun 'gitmap scan' in a directory containing your git repos first,\nor pass --all to query the database directly.\n"
 	ErrExecUsage                = "Usage: gitmap exec <git-args...>\nExample: gitmap exec fetch --prune"
 	ErrExecLoadFailed           = "Error: could not load gitmap.json at %s: %v (operation: read)\nRun 'gitmap scan' first.\n"
 	ErrReleaseVersionRequired   = "Error: version is required.\nProvide a version argument, use --bump, or create a version.json file."
