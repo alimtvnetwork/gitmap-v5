@@ -1,8 +1,6 @@
 # Changelog
 
-## Unreleased — schema-version fast-path, `db-migrate --force`, post-update force-migrate, last-release detector fix, `gitmap install clean-code`
-
-> Pending the next `gitmap r` minor bump (per the rule that any code change must bump at least minor). Once cut, this section will be renamed to the resolved `vX.Y.0` heading. Run `gitmap r` (no args, auto-bumps minor) to perform the bump and write `.gitmap/release/vX.Y.0.json` + `latest.json` — those metadata files are never edited by hand.
+## v3.21.0 — (2026-04-20) — schema-version fast-path, `db-migrate --force`, post-update force-migrate, last-release detector fix, `gitmap install clean-code`
 
 ### Added (schema-version fast-path)
 
@@ -28,9 +26,7 @@
 
 - Bump policy for `SchemaVersionCurrent`: bump on ANY structural change to `Migrate()` — new `CREATE TABLE`, new `ALTER TABLE`, new v15 phase, new seed call, new ID rename. Do NOT bump for cosmetic changes (comments, log strings, code moves that produce identical SQL). The marker is cleared by `gitmap db-reset` and by `migrateLegacyIDs()` when it rebuilds the Repos table, so any database requiring genuine repair always re-runs the full pipeline regardless of the marker value.
 
-## Unreleased — `gitmap install clean-code` PowerShell IRM | IEX coding-guidelines installer
-
-> Drafted earlier in the same Unreleased window; will be folded into the same `vX.Y.0` heading at release time.
+### Added (install) — `gitmap install clean-code`
 
 ### Added (install)
 
