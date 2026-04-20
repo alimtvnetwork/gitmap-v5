@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Pre-commit hook: runs golangci-lint on staged Go files.
+# Pre-commit hook: runs golangci-lint with misspell, exhaustive, errcheck + full linter suite.
+# Catches: spelling regressions (misspell), incomplete switches (exhaustive), unchecked errors (errcheck)
 # Install: cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 
 STAGED=$(git diff --cached --name-only --diff-filter=ACM -- '*.go')
@@ -10,11 +11,11 @@ fi
 
 if ! command -v golangci-lint &>/dev/null; then
   echo "⚠ golangci-lint not found — skipping lint check."
-  echo "  Install: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest"
+  echo "  Install: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8"
   exit 0
 fi
 
-echo "Running golangci-lint..."
+echo "Running golangci-lint (misspell + exhaustive + errcheck + 15 other linters)..."
 cd gitmap || exit 0
 golangci-lint run ./... --timeout=5m
 exit $?
