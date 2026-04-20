@@ -3,7 +3,8 @@
 ## Core
 Strict code style: <200 lines/file, <15 lines/func, positive logic, pascal case constants, 'is/has' boolean prefixes.
 Zero-swallow error policy. Explicitly log errors to os.Stderr using standardized format. Use `errors.Is`.
-NEVER manually create, modify, or delete files within `.gitmap/release/` or `.gitmap/release-assets/`.
+Version bump = update FOUR files directly: `gitmap/constants/constants.go` (Version const), `.gitmap/release/latest.json`, new `.gitmap/release/vX.Y.Z.json`, and `CHANGELOG.md` (rename Unreleased heading). Do NOT defer to `gitmap r`. See [Version Bump Procedure](mem://project/version-bump-procedure).
+NEVER touch `.gitmap/release-assets/` manually (release JSON files are now AI-managed; release-assets are not).
 No magic strings. Centralize in constants. All CLI IDs must be exclusively in `constants_cli.go`.
 Windows-first platform development strategy. Scripts must handle Windows encoding (UTF-8 BOM).
 Go v1.24.13. golangci-lint pinned to v1.64.8, govulncheck pinned to v1.1.4.
@@ -13,9 +14,10 @@ Unified `.gitmap/` directory structure at repository root for all artifacts.
 Clone-next flattens by default (v2.75.0+): clones into base name folder, tracks versions in RepoVersionHistory.
 Completion generator uses marker-comment opt-in (v3.0.0+): `// gitmap:cmd top-level` on const block, `// gitmap:cmd skip` per spec. CI `generate-check` enforces drift.
 v15 legacy compat shims (JSON `draft`/`preRelease` overlay + SQLite `Draft`/`PreRelease` column rename) are KEPT through v3.x; removal scheduled for v4.0.0.
-Current version: v3.12.1 (legacy Draft/PreRelease test cleanup + AST registry parity test + fresh 28-table ERD).
+Current version: v3.21.0 (schema-version fast-path + db-migrate --force + post-update force-migrate + last-release detector fix + gitmap install clean-code).
 
 ## Memories
+- [Version Bump Procedure](mem://project/version-bump-procedure) — Update Version const + latest.json + new vX.Y.Z.json + CHANGELOG.md heading directly. Do NOT defer to `gitmap r`.
 - [v3.12.1 Session](mem://03-v3.12.1-session) — Legacy field migration, AST parity test, fresh ERD, v15 audit, version bump (v3.12.1)
 - [v15 Legacy Compat Audit](mem://02-v15-legacy-compat-audit) — Keep JSON overlay + SQLite column rename through v3.x, remove in v4.0.0
 - [v15 Rename Progress](mem://features/v15-rename-progress) — Phase 1 complete: all 22 tables singular + {Table}Id PKs + IsDraft/IsPreRelease + CSharp→Csharp (v3.5.0)
