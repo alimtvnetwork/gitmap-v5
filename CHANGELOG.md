@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.22.0 — (2026-04-20) — `gitmap r` auto-registers cwd repo when missing
+
+### Fixed (release persistence)
+
+- **`gitmap r` no longer aborts release-DB caching with `no repo registered for path "..."` when the cwd has never been scanned.** When `resolveOrRegisterCurrentRepoID` cannot find the cwd in the `Repo` table, it now auto-registers: cwd becomes a single `Repo` row (slug / URLs / branch built via `mapper.BuildRecords`, identical to a real scan), parent dir becomes a `ScanFolder` row via `EnsureScanFolder`, and `TagReposByScanFolder` links them. The Release.RepoId FK is then satisfied on the retry, so the release row is persisted in the SAME `gitmap r` invocation that just pushed the tag — no second `gitmap scan` round-trip required.
+- **Visible feedback**: prints `✓ Auto-registered repo "..." under scan folder "..." (#N)` to stdout so the user knows the DB was healed; failures (`auto-register failed: ...`) surface to stderr without aborting the release itself (the git tag/push already succeeded).
+
+### Files (this section)
+
+- New: `gitmap/cmd/releaseautoregister.go` — `autoRegisterCurrentRepo(db, cwd)` builds a single-repo scan record, upserts it, ensures the parent ScanFolder, and tags the repo.
+- Edited: `gitmap/cmd/releasepersist.go` — `persistReleaseToDB` now calls `resolveOrRegisterCurrentRepoID` (resolve → auto-register on miss → re-resolve). The original `resolveCurrentRepoID` is kept for `listreleasesload.go` which should remain read-only.
+
 ## v3.21.0 — (2026-04-20) — schema-version fast-path, `db-migrate --force`, post-update force-migrate, last-release detector fix, `gitmap install clean-code`
 
 ### Added (schema-version fast-path)
