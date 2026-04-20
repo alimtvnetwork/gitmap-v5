@@ -87,7 +87,7 @@ const CommandPalette = () => {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card text-muted-foreground text-xs font-mono hover:bg-muted/50 hover:text-foreground transition-colors"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card text-muted-foreground text-xs font-sans hover:bg-muted/50 hover:text-foreground transition-colors"
       >
         <Search className="h-3 w-3" />
         <span className="hidden sm:inline">Search...</span>
@@ -116,8 +116,10 @@ const CommandPalette = () => {
             {commands.map((cmd) => (
               <CommandItem key={cmd.name} onSelect={() => go("/commands")} keywords={[cmd.name, cmd.alias ?? "", cmd.description]}>
                 <BookOpen className="mr-2 h-4 w-4 text-muted-foreground" />
-                <span className="font-mono">{cmd.name}</span>
-                {cmd.alias && <span className="text-muted-foreground ml-1 text-xs">({cmd.alias})</span>}
+                <span className="font-sans font-semibold">{cmd.name}</span>
+                {cmd.alias && (
+                  <span className="ml-1 text-xs font-sans font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">{cmd.alias}</span>
+                )}
                 <span className="text-muted-foreground ml-2 text-xs truncate">{cmd.description}</span>
               </CommandItem>
             ))}
@@ -130,8 +132,8 @@ const CommandPalette = () => {
               <CommandItem key={`${f.command}-${f.flag}-${i}`} onSelect={() => go("/flags")} keywords={[f.flag, f.description, f.command]}>
                 <Flag className="mr-2 h-4 w-4 text-muted-foreground" />
                 <span className="font-mono text-primary">{f.flag}</span>
-                <span className="text-muted-foreground ml-2 text-xs">{f.command}</span>
-                <span className="text-muted-foreground ml-1 text-xs truncate hidden sm:inline">— {f.description}</span>
+                <span className="text-muted-foreground ml-2 text-xs font-sans">{f.command}</span>
+                <span className="text-muted-foreground ml-1 text-xs truncate hidden sm:inline font-sans">— {f.description}</span>
               </CommandItem>
             ))}
           </CommandGroup>
