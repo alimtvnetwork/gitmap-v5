@@ -1,5 +1,40 @@
 # Changelog
 
+## v3.26.0 — (2026-04-20) — Audit + new CI guard for constants/ identifier collisions
+
+### Added (CI)
+
+- **New `constants-collision-check` job** in `.github/workflows/ci.yml` that runs `python3 .github/scripts/check-constants-collisions.py` on every push and PR. Fails fast (no Go toolchain) when any of these conditions hold across the 69 `gitmap/constants/constants_*.go` files:
+  1. **Cross-file exact-name collision** — the same identifier (e.g. `HelpGitHubDesktop`) is declared in two files. This is exactly the v3.25.0 regression that took down `go build` and motivated the audit.
+  2. **Cross-file case-insensitive collision** — different exact names that lowercase to the same string (e.g. `HelpFoo` vs `helpFoo`) and live in different files. Latent confusion risk even though Go accepts it.
+  3. **Intra-file duplicate declaration** — the same identifier appears twice in one file. `go build` already catches this, but the script reports the offending lines without waiting for a Go compile.
+
+- **New script `.github/scripts/check-constants-collisions.py`** — a string-literal-aware Python parser that tracks raw-string (`` `...` ``) and `"..."` quoted regions, so SQL keywords (`FROM`, `WHERE`, `VALUES`, `ORDER`, `SET`, ...) appearing inside multi-line raw-string SQL constants are NEVER mistaken for top-level identifiers. A naive line-based regex auditor reported 8 false-positive "collisions" from these tokens; the literal-aware parser reports 0.
+
+### Audit results (current tree)
+
+After the v3.25.2 fix, the auditor scanned 69 files and 2,902 unique top-level identifiers:
+
+- **Cross-file exact-name collisions: 0**
+- **Cross-file case-insensitive collisions: 0**
+- **Intra-file duplicate declarations: 0**
+
+The constants package is fully clean. All future PRs that introduce a collision (intentionally or by oversight) will be blocked by the new CI job before the broken build reaches `main`.
+
+### Why a Python script instead of extending the existing bash awk guard
+
+The existing `check-constants-naming.sh` is a single-pass line-based awk extractor (and rewriting it to track raw-string state across lines in portable mawk would be painful). A focused 130-line Python script is easier to read, easier to extend, and Python is preinstalled on every Ubuntu runner.
+
+### Files (this section)
+
+- Created: `.github/scripts/check-constants-collisions.py` — string-literal-aware collision auditor.
+- Edited: `.github/workflows/ci.yml` — added `constants-collision-check` job; added it to the `test-summary` `needs:` list so the overall CI status reflects the guard.
+- Edited: `gitmap/constants/constants.go` — bumped Version to 3.26.0.
+- Created: `.gitmap/release/v3.26.0.json` — release metadata.
+- Edited: `.gitmap/release/latest.json` — pointer to v3.26.0.
+
+---
+
 ## v3.25.2 — (2026-04-20) — Fix `HelpGitHubDesktop` redeclaration build error
 
 ### Fixed (Build)
