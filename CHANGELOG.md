@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.13.10 — (2026-04-20) — Completion generator resynced for find-next/fn
+
+### Fixed
+
+- **`gitmap/completion/allcommands_generated.go`** — CI `generate-check` flagged 2 missing commands after the v3.13.7 marker fix in `constants_find_next.go` made them visible to the generator. Inserted `find-next` and `fn` in alphabetical order between `export` and `g`. Equivalent to `cd gitmap && go generate ./...`.
+
+
 ## v3.13.9 — (2026-04-20) — deploy-DFD CI job removed
 
 ### Removed
