@@ -107,7 +107,9 @@ function Resolve-DeployRoot {
     if ($InstallDir.Length -gt 0) { return $InstallDir }
 
     # Check the active binary's grandparent (deployRoot/gitmap-cli/gitmap.exe).
-    $cmd = Get-Command gitmap -ErrorAction SilentlyContinue
+    # Same multi-binary defense as Try-SelfUninstall: pick the FIRST
+    # entry so a stale shim doesn't poison Split-Path.
+    $cmd = Get-Command gitmap -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($cmd -and (Test-Path $cmd.Source)) {
         $parent = Split-Path (Resolve-Path $cmd.Source).Path -Parent
         $grand  = Split-Path $parent -Parent
