@@ -1,5 +1,20 @@
 # Changelog
 
+## v3.30.0 — (2026-04-20) — Fix Go Report Card badge URL to point at the actual module path
+
+### Fixed (Docs)
+
+- **README.md Go Report Card badge** now points at `github.com/alimtvnetwork/gitmap-v5/gitmap` (the real Go module path set in v3.27.0) instead of the repo root `github.com/alimtvnetwork/gitmap-v5`. The previous URL returned a 404 from the Go module proxy because there is no `go.mod` at the repo root — the module lives one directory down in `gitmap/`. Both the badge image and the click-through report link were updated.
+
+### Files changed
+
+- `README.md` — single line, both the `goreportcard.com/badge/...` image URL and the `goreportcard.com/report/...` link target now include the `/gitmap` subpath suffix.
+
+### Compatibility
+
+Pure documentation fix. No source, CI, or runtime change.
+
+
 ## v3.28.0 — (2026-04-20) — Lucrative scan summary: grouped sections + emoji-rich post-scan log
 
 ### Improved (UX / Terminal Output)
