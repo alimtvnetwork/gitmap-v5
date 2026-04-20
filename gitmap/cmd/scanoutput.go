@@ -88,7 +88,7 @@ func writeFolderStructure(records []model.ScanRecord, outputDir string) {
 
 		return
 	}
-	fmt.Printf(constants.MsgStructureWritten, path)
+	fmt.Printf(constants.MsgStructureWritten, filepath.Base(path))
 }
 
 // writeCloneScript writes a PowerShell clone script.
