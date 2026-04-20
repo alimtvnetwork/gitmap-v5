@@ -148,7 +148,7 @@ func buildUpdateScript(repoPath, runPS1 string) string {
 			repoPath,
 			constants.GitMapSubdir,
 			constants.GitMapCliSubdir,
-			constants.WindowsBinaryName,
+			constants.Manifest.BinaryName.Windows,
 			knownSubdirs,
 		) +
 		constants.UpdatePSVersionBefore +
