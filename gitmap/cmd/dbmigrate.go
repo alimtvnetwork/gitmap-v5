@@ -13,9 +13,11 @@ import (
 // It opens the active-profile database, runs Migrate() (which is idempotent
 // and safe to invoke repeatedly), and prints a single-line summary. The
 // --verbose flag prints every migration step that ran.
+// The --force flag clears the schema_version marker before Migrate() so the
+// full pipeline re-runs even when the fast-path would otherwise skip it.
 func runDBMigrate(args []string) {
 	checkHelp(constants.CmdDBMigrate, args)
-	verbose := parseDBMigrateFlags(args)
+	verbose, force := parseDBMigrateFlags(args)
 
 	fmt.Print(constants.MsgDBMigrateRunning)
 
@@ -26,6 +28,10 @@ func runDBMigrate(args []string) {
 	}
 	defer db.Close()
 
+	if force {
+		clearSchemaVersionMarker(db)
+	}
+
 	if err := db.Migrate(); err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrDBMigrateFailFmt, err)
 		os.Exit(1)
@@ -34,16 +40,32 @@ func runDBMigrate(args []string) {
 	printDBMigrateSummary(verbose)
 }
 
-// parseDBMigrateFlags extracts the --verbose flag.
-func parseDBMigrateFlags(args []string) bool {
+// parseDBMigrateFlags extracts the --verbose and --force flags.
+func parseDBMigrateFlags(args []string) (bool, bool) {
 	fs := flag.NewFlagSet(constants.CmdDBMigrate, flag.ExitOnError)
 	v := fs.Bool(constants.FlagDBMigrateVerbose, false, constants.FlagDescDBMigrateV)
+	f := fs.Bool(constants.FlagDBMigrateForce, false, constants.FlagDescDBMigrateF)
 
 	if err := fs.Parse(reorderFlagsBeforeArgs(args)); err != nil {
 		os.Exit(2)
 	}
 
-	return *v
+	return *v, *f
+}
+
+// clearSchemaVersionMarker deletes the persisted schema_version Setting row
+// so the next Migrate() call cannot take the fast-path. Failures are warned
+// to stderr but never fatal — the worst case is the fast-path still triggers
+// and the user just re-runs without --force, which is the existing behavior.
+func clearSchemaVersionMarker(db *store.DB) {
+	err := db.DeleteSetting(constants.SettingSchemaVersion)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, constants.WarnDBMigrateForceClear, err)
+
+		return
+	}
+
+	fmt.Print(constants.MsgDBMigrateForceClear)
 }
 
 // printDBMigrateSummary writes the post-run summary line.
