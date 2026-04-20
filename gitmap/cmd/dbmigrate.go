@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/user/gitmap/constants"
+	"github.com/user/gitmap/store"
 )
 
 // runDBMigrate handles the "db-migrate" (alias "dbm") subcommand.
