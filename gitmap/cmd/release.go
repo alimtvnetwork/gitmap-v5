@@ -154,12 +154,10 @@ func parseReleaseFlags(args []string) (version, assets, commit, branch, bump, no
 	fs.StringVar(notesFlag, "N", "", constants.FlagDescNotes)
 
 	fs.Parse(reorderFlagsBeforeArgs(args))
-
 	version = ""
 	if fs.NArg() > 0 {
 		version = fs.Arg(0)
 	}
-
 	return version, *assetsFlag, *commitFlag, *branchFlag, *bumpFlag, *notesFlag, *targetsFlag, []string(zgGroups), []string(zgItems), *bundleFlag, *draftFlag, *dryRunFlag, *verboseFlag, *compressFlag, *checksumsFlag, *binFlag, *listTargetsFlag, *noCommitFlag, *yesFlag
 }
 
