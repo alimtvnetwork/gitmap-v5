@@ -207,4 +207,13 @@ const (
 	ErrV15Phase3Migration    = "v15 Phase 1.3 migration failed: %v"
 	ErrV15Phase4Migration    = "v15 Phase 1.4 migration failed: %v"
 	ErrV15Phase5Migration    = "v15 Phase 1.5 migration failed: %v"
+	ErrV15Phase6Migration    = "v15 Phase 1.6 migration failed: %v"
+)
+
+// Phase 1.6 (v17) Release.RepoId FK migration messages.
+const (
+	MsgV15Phase6Start = "→ Migrating Release table: adding RepoId FK to Repo (v3.17.0 schema)..."
+	MsgV15Phase6Wipe  = "  Existing Release rows will be wiped and re-imported from .gitmap/release/v*.json on next list-releases."
+	MsgV15Phase6Done  = "✓ Release table dropped — will be recreated with RepoId FK on next CREATE pass."
+	ErrReleaseNoRepo  = "cannot persist release: no repo registered for path %q. Run `gitmap scan` first to register the repo, then retry."
 )
