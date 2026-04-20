@@ -1,5 +1,26 @@
 # Changelog
 
+## v3.32.1 — (2026-04-20) — Fix `gitmap status` looking at legacy bare `output/` path
+
+### Fixed
+
+- **`gitmap status` no longer fails with `could not load gitmap.json at output\gitmap.json`** when run from a directory that has no `output/` folder.
+  - Root cause: `loadRecordsJSONFallback` joined `constants.DefaultOutputFolder` (the legacy bare `"output"` value, kept around for backward compat) with `gitmap.json`, instead of the unified `.gitmap/output` path used by every other command since v2.99.
+  - Two-part fix:
+    1. Look at the correct unified path: `constants.DefaultOutputDir` → `.gitmap/output/gitmap.json`.
+    2. When the JSON file is missing (e.g. the user has not run `gitmap scan` from this exact directory yet), transparently fall through to the SQLite database — the DB is the source of truth post-v2 and usually has every repo the user has ever scanned. Previously, status exited with an error even though the DB had perfectly good data.
+- New friendly message `MsgStatusNoData` is shown only when both the JSON file is missing AND the database has zero repos: `"No tracked repos found. Run 'gitmap scan' in a directory containing your git repos first, or pass --all to query the database directly."`
+
+### Implementation
+
+- `gitmap/cmd/status.go` — `loadRecordsJSONFallback` now stat-checks the JSON path first and delegates to a new `loadAllRecordsDBOrEmpty` helper when missing. Path joined with `DefaultOutputDir` instead of `DefaultOutputFolder`.
+- `gitmap/constants/constants_messages.go` — new `MsgStatusNoData` constant.
+
+### Compatibility
+
+- Pure bug fix; behavior is strictly more permissive (succeeds in cases that previously errored). No flag, file, or DB schema impact.
+
+
 ## v3.32.0 — (2026-04-20) — Scan output: hoist common base path, show filenames only
 
 ### Changed
