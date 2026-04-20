@@ -602,14 +602,73 @@ function Copy-DataFolder {
 # Required for `gitmap help-dashboard` (hd) which resolves docs-site/
 # relative to the binary directory. Without this, `gitmap hd` fails with:
 #   "Docs site directory not found at <deploy>/docs-site"
+#
+# Source resolution order (first hit wins):
+#   1. <repo>/docs-site/dist/   — legacy layout with a dedicated subdir
+#   2. <repo>/docs-site/        — legacy layout, source only (no prebuilt dist)
+#   3. <repo>/dist/             — current layout where the repo root IS the
+#                                 Vite docs app (no docs-site/ subdir)
+#   4. Auto-build at repo root  — if package.json has a `build` script and
+#                                 npm is on PATH, run it and use <repo>/dist/.
+#   5. Warn — `gitmap hd` will fail until docs are built.
 function Copy-DocsSite {
     param($AppDir)
 
-    $docsSource = Join-Path $RepoRoot "docs-site"
-    $docsDest   = Join-Path $AppDir "docs-site"
+    $docsDest    = Join-Path $AppDir "docs-site"
+    $legacyDir   = Join-Path $RepoRoot "docs-site"
+    $legacyDist  = Join-Path $legacyDir "dist"
+    $rootDist    = Join-Path $RepoRoot "dist"
+    $rootPkg     = Join-Path $RepoRoot "package.json"
 
-    if (-not (Test-Path $docsSource)) {
-        Write-Warn "docs-site not found at $docsSource - 'gitmap hd' will fail"
+    # 1. Legacy <repo>/docs-site/dist/
+    if (Test-Path $legacyDist) {
+        $distDest = Join-Path $docsDest "dist"
+        if (Test-Path $distDest) { Remove-Item $distDest -Recurse -Force }
+        New-Item -ItemType Directory -Path $docsDest -Force | Out-Null
+        Copy-Item $legacyDist $distDest -Recurse
+        Write-Info "Copied docs-site/dist to gitmap app directory"
+        return
+    }
+
+    # 3. Current <repo>/dist/ (root-level Vite app)
+    if (Test-Path $rootDist) {
+        $distDest = Join-Path $docsDest "dist"
+        if (Test-Path $distDest) { Remove-Item $distDest -Recurse -Force }
+        New-Item -ItemType Directory -Path $docsDest -Force | Out-Null
+        Copy-Item $rootDist $distDest -Recurse
+        Write-Info "Copied root dist/ to gitmap app docs-site/dist"
+        return
+    }
+
+    # 4. Auto-build the root Vite app if package.json + npm available
+    if ((Test-Path $rootPkg) -and (Get-Command npm -ErrorAction SilentlyContinue)) {
+        $pkgRaw = Get-Content $rootPkg -Raw
+        if ($pkgRaw -match '"build"\s*:') {
+            Write-Info "Auto-building docs (npm run build) at repo root..."
+            Push-Location $RepoRoot
+            try {
+                npm run build 2>&1 | Out-Null
+                if ($LASTEXITCODE -eq 0 -and (Test-Path $rootDist)) {
+                    $distDest = Join-Path $docsDest "dist"
+                    if (Test-Path $distDest) { Remove-Item $distDest -Recurse -Force }
+                    New-Item -ItemType Directory -Path $docsDest -Force | Out-Null
+                    Copy-Item $rootDist $distDest -Recurse
+                    Write-Info "Built and copied docs to gitmap app docs-site/dist"
+                    return
+                }
+            } finally {
+                Pop-Location
+            }
+            Write-Warn "Auto-build failed - 'gitmap hd' will fail"
+            return
+        }
+    }
+
+    # 2. Legacy <repo>/docs-site/ source-only (npm-dev fallback)
+    if (Test-Path $legacyDir) {
+        # fall through to existing source-copy block below
+    } else {
+        Write-Warn "No docs found (checked docs-site/dist, docs-site/, dist/) - 'gitmap hd' will fail"
         return
     }
 
