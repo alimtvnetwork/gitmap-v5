@@ -1,5 +1,24 @@
 # Changelog
 
+## v3.13.1 — (2026-04-20) — Lint sweep + gitmap-v4→v5 URL fix + read-prompt overwrite
+
+### Fixed
+
+- **golangci-lint v1.64.8 CI errors** — 26 linter errors fixed across the Go CLI:
+  - `errcheck`: Explicitly ignored or checked return values for `fmt.Sscanf` in `probe/probe.go` and `f.Write` in `cmd/selfinstall.go`.
+  - `gosec`: Suppressed G201 (SQL formatting) and G107 (HTTP with variable) via `//nolint:gosec` where variables are internal constants/specs.
+  - `gocritic` `sloppyReassign`: Removed unnecessary `err` re-assignments in `movemerge/copy.go`, `movemerge/move.go`, `movemerge/resolve.go`, `cmd/selfinstall.go`.
+  - `unused`: Removed `isDuplicateColumnError` in `store/store.go`.
+  - `unparam`: Removed unused `info os.FileInfo` parameters from `shouldIgnore` and `shouldSkipWalk`.
+  - `wastedassign`: Removed dead `stashLabel` assignment in `cmd/releasealias.go`.
+  - `exhaustive`: Added missing switch cases for `PreferPolicy`, `Direction`, and `DiffKind`.
+- **US-English spelling sweep** — Converted UK spellings to US: `behaviour→behavior`, `honours→honors`, `honouring→honoring`, `artefacts→artifacts`, `Centralised→Centralized`, `summarises→summarizes`, `Recognises→Recognizes`.
+- **Remote installer URLs** — Updated `constants_selfinstall.go` `SelfInstallRemotePwsh` and `SelfInstallRemoteBash` from `gitmap-v4` to `gitmap-v5`.
+
+### Changed
+
+- **`.lovable/prompts/01-read-prompt.md` overwrite** — New onboarding prompt with structured Phase 1–4 flow and mandatory deep-dive source specs lookup table.
+
 ## v3.12.1 — (2026-04-20) — AST registry parity + spec cross-links + legacy-field test cleanup
 
 ### Added
