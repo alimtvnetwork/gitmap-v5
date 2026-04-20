@@ -82,8 +82,52 @@ show_banner() {
     echo ""
 }
 
+# -- Load deploy manifest (single source of truth) -------------
+# Mirrors run.ps1's Get-DeployManifest. Reads gitmap/constants/deploy-manifest.json
+# so APP_SUBDIR / LEGACY_APP_SUBDIRS aren't hardcoded. Renaming the deploy
+# folder ONLY requires editing that JSON file.
+APP_SUBDIR="gitmap-cli"
+LEGACY_APP_SUBDIRS=("gitmap")
+load_deploy_manifest() {
+    local manifest="$GITMAP_DIR/constants/deploy-manifest.json"
+    if [[ ! -f "$manifest" ]]; then
+        write_warn "deploy-manifest.json not found at $manifest — using defaults"
+        return
+    fi
+    local app
+    app=$(grep -E '"appSubdir"' "$manifest" | head -n1 | sed -E 's/.*"appSubdir"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')
+    if [[ -n "$app" ]]; then
+        APP_SUBDIR="$app"
+    fi
+    # legacyAppSubdirs is a JSON array — extract values between [ ... ].
+    local legacy_block
+    legacy_block=$(awk '/"legacyAppSubdirs"/,/]/' "$manifest")
+    if [[ -n "$legacy_block" ]]; then
+        local legacy_csv
+        legacy_csv=$(echo "$legacy_block" | grep -oE '"[^"]+"' | sed -E 's/^"(.*)"$/\1/' | grep -v '^legacyAppSubdirs$' || true)
+        if [[ -n "$legacy_csv" ]]; then
+            LEGACY_APP_SUBDIRS=()
+            while IFS= read -r line; do
+                [[ -n "$line" ]] && LEGACY_APP_SUBDIRS+=("$line")
+            done <<< "$legacy_csv"
+        fi
+    fi
+}
+
+# is_known_app_subdir returns 0 if $1 matches APP_SUBDIR or any legacy entry.
+is_known_app_subdir() {
+    local name="$1"
+    [[ "$name" == "$APP_SUBDIR" ]] && return 0
+    local legacy
+    for legacy in "${LEGACY_APP_SUBDIRS[@]}"; do
+        [[ "$name" == "$legacy" ]] && return 0
+    done
+    return 1
+}
+
 # -- Load config -----------------------------------------------
 load_config() {
+    load_deploy_manifest
     local config_path="$GITMAP_DIR/powershell.json"
     if [[ -f "$config_path" ]]; then
         write_info "Config loaded from powershell.json"
