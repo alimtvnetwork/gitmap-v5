@@ -62,7 +62,7 @@ func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFo
 	}
 	records := mapper.BuildRecords(repos, cfg.DefaultMode, cfg.Notes)
 	outputDir := resolveOutputDir(cfg.OutputDir, absDir)
-	fmt.Print(constants.MsgSectionArtifacts)
+	fmt.Printf(constants.MsgSectionArtifacts, outputDir)
 	writeAllOutputs(records, outputDir, outFile, quiet)
 	saveScanCache(outputDir, cache)
 	fmt.Print(constants.MsgSectionDatabase)
