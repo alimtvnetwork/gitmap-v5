@@ -219,9 +219,9 @@ where they don't apply.
 
 | Capability | `run.ps1` (Windows dev) | `run.sh` (Unix dev) | `gitmap/scripts/install.sh` (end-user) |
 |------------|-------------------------|---------------------|----------------------------------------|
-| **DFD-1** Wrapped layout `<root>/gitmap/gitmap(.exe)` | `Deploy-Binary` → `$appDir = Join-Path $target "gitmap"` | `deploy_binary()` → `APP_DIR="$target/gitmap"` | `install_binary()` → `INSTALL_DIR/gitmap/` |
-| **DFD-2** Resolve target from PATH first | `Resolve-DeployTarget` walks `Get-Command gitmap` | `resolve_deploy_target()` walks `command -v gitmap` | Honors `--prefix` then `$HOME/.local` default |
-| **DFD-3** Migrate legacy unwrapped install | `Repair-DeployLayout` | `repair_deploy_layout()` | `migrate_legacy_layout()` |
+| **DFD-1** Wrapped layout `<root>/gitmap-cli/gitmap(.exe)` | `Deploy-Binary` → `$appDir = Join-Path $target "gitmap-cli"` | `deploy_binary()` → `app_dir="$target/gitmap-cli"` (v3.13.11+) | `install_binary()` → `INSTALL_DIR/gitmap-cli/` (v3.13.11+) |
+| **DFD-2** Resolve target from PATH first | `Resolve-DeployTarget` walks `Get-Command gitmap`; accepts `gitmap-cli` or legacy `gitmap` parent | `resolve_deploy_target()` walks `command -v gitmap`; accepts `gitmap-cli` or legacy `gitmap` parent | Honors `--prefix` then `$HOME/.local` default |
+| **DFD-3** Migrate legacy unwrapped install + legacy `gitmap/` folder | `Repair-DeployLayout` (handles unwrapped + `gitmap` → `gitmap-cli`) | `repair_deploy_layout()` (handles unwrapped + `gitmap` → `gitmap-cli`, v3.13.11+) | `repair_layout()` (handles unwrapped + `gitmap` → `gitmap-cli`, v3.13.11+) |
 | **DFD-4** PATH registration (user + session) | `Register-OnPath` (user env + `$env:Path`) | `register_on_path()` (profile snippet + `export`) | `register_on_path()` (profile snippet) |
 | **DFD-5** Re-source shell profile | `21-post-install-shell-activation` snippet emitted | `source_profile_snippet()` per spec 21 | `source_profile_snippet()` per spec 21 |
 | **DFD-6** Pre-deploy cleanup of `.old`/update temps | `Invoke-DeployCleanup` | `invoke_deploy_cleanup()` | `invoke_deploy_cleanup()` |

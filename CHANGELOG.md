@@ -1,5 +1,28 @@
 # Changelog
 
+## v3.14.0 — (2026-04-20) — Unix deploy migrated to gitmap-cli/ for cross-platform parity
+
+### Changed
+
+- **`run.sh`** — Now deploys into `<deploy-target>/gitmap-cli/` instead of `<deploy-target>/gitmap/`, matching `run.ps1` (which made the same rename in v3.6.0). The deploy target is now visually unambiguous: the folder name (`gitmap-cli`) no longer collides with the binary name (`gitmap`), and the Go-side cleanup/path logic in `gitmap/cmd/updatecleanup_paths.go` (which already used `GitMapCliSubdir = "gitmap-cli"` for ALL platforms) finally agrees with what's on disk on Unix.
+- **`gitmap/scripts/install.sh`** — End-user installer also migrated to `${INSTALL_DIR}/gitmap-cli/`. The pre-existing `repair_layout()` had a latent bug where `app_dir` and `legacy_binary` resolved to the same path (`$target/${BINARY_NAME}`); the rewrite uses distinct variables and now handles BOTH legacy layouts correctly.
+
+### Added (DFD-3 migration)
+
+- **Two-stage legacy layout migration** in `repair_deploy_layout()` (run.sh) and `repair_layout()` (install.sh):
+  1. **Migration A** — pre-DFD unwrapped install: `<target>/gitmap` (binary at top level) → `<target>/gitmap-cli/gitmap` + sibling data/, CHANGELOG.md, docs/, docs-site/.
+  2. **Migration B** — v3.6.0..v3.13.10 wrapped install: `<target>/gitmap/` (folder) → `<target>/gitmap-cli/` via single `mv`. Skipped with a warning if both folders already exist (manual review needed).
+- **PATH-resolution backwards-compat** — `resolve_deploy_target()` in run.sh now accepts both `gitmap-cli` and legacy `gitmap` as the active-binary parent dir name, so users on the v3.6.0..v3.13.10 layout still get their existing deploy target detected on first migration run.
+
+### Updated
+
+- **`spec/04-generic-cli/22-data-folder-deploy-and-cleanup.md`** — DFD-1/DFD-2/DFD-3 rows of the cross-platform parity table updated to reflect `gitmap-cli` on all three drivers (run.ps1, run.sh, install.sh).
+
+### Why now
+
+The Go side of the codebase (cleanup, doctor, binary location, upgrade script) has consistently used `constants.GitMapCliSubdir = "gitmap-cli"` since v3.6.0 — but only `run.ps1` actually deployed there. On Unix, `run.sh` and `install.sh` were still writing to `gitmap/`, which meant `gitmap doctor`, `gitmap update-cleanup`, and PATH-derived deploy detection were all looking in the wrong folder. The v3.13.5/v3.13.7/v3.13.8 patch-stream kept band-aiding tests and CI; this release fixes the actual divergence.
+
+
 ## v3.13.9 — (2026-04-20) — deploy-DFD CI job removed
 
 ### Removed
