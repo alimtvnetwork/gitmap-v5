@@ -10,13 +10,18 @@
 # Rule: helpers using a generic verb prefix MUST be qualified with a domain
 # word AFTER the prefix that narrows the scope (e.g. `invokeAliasRelease`,
 # `runOnePullJob`, `runOneScanRelease`, `persistReleaseToDB`). Bare or
-# generically-suffixed forms (`invokeRelease`, `runOne`, `persistAll`,
-# `handleRelease`, `executeJob`) are forbidden.
+# generically-suffixed forms (`invokeRelease`, `runOne`, `persistAll`) are
+# forbidden.
+#
+# Note: `execute<Cmd>` and `handle<Cmd>` are the canonical CLI router pattern
+# (one per top-level command, e.g. `executeRelease`, `handleChangelogOpen`)
+# and are NOT flagged here. Only `invoke`, `persist`, and `runOne` — which
+# are *helper* verbs that frequently get reinvented across files — trigger.
 #
 # Forbidden patterns (regex, anchored at func declaration):
-#   1. ^func +(invoke|persist|handle|execute) *\(           -> bare verb
-#   2. ^func +runOne *\(                                     -> bare runOne
-#   3. ^func +(invoke|persist|handle|execute|runOne)(Release|Task|Job|Item|All|One|Cmd) *\(
+#   1. ^func +(invoke|persist) *\(            -> bare verb, no noun
+#   2. ^func +runOne *\(                       -> bare runOne
+#   3. ^func +(invoke|persist)(Release|Task|Job|Item|All|One|Cmd) *\(
 #      -> verb + over-generic noun (the noun must be project-specific,
 #         e.g. AliasRelease/ScanRelease/PullJob qualify the scope)
 #
@@ -33,9 +38,9 @@ fi
 
 # Patterns are written as extended regex (-E).
 PATTERNS=(
-  '^func +(invoke|persist|handle|execute) *\('
+  '^func +(invoke|persist) *\('
   '^func +runOne *\('
-  '^func +(invoke|persist|handle|execute|runOne)(Release|Task|Job|Item|All|One|Cmd) *\('
+  '^func +(invoke|persist|runOne)(Release|Task|Job|Item|All|One|Cmd) *\('
 )
 
 violations=0
@@ -61,7 +66,8 @@ if [ "$violations" -gt 0 ]; then
   echo "::error::  invokeRelease       -> invokeAliasRelease"
   echo "::error::  runOne              -> runOnePullJob, runOneScanRelease"
   echo "::error::  persistAll          -> persistReleaseToDB"
-  echo "::error::  handleRelease       -> handleReleaseAlias"
+  echo "::error::Note: executeXxx / handleXxx are reserved for the canonical"
+  echo "::error::      command handler per top-level command and are allowed."
   exit 1
 fi
 
