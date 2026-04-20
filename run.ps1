@@ -989,9 +989,9 @@ function Remove-DriveRootShim {
     if (-not (Test-Path $shimPath)) { return 0 }
 
     $shimDir = Split-Path $shimPath -Parent
-    # Safety: only remove if it sits at the literal drive root and not inside a gitmap-cli/ or legacy gitmap/ folder.
+    # Safety: only remove if it sits at the literal drive root and not inside an app subdir.
     $shimDirName = Split-Path $shimDir -Leaf
-    if ($shimDirName -eq "gitmap-cli" -or $shimDirName -eq "gitmap") {
+    if (Test-KnownAppSubdir $shimDirName) {
         return 0
     }
 
@@ -1340,7 +1340,7 @@ if (-not $NoDeploy) {
     Deploy-Binary -Config $config -BinaryPath $binaryPath -OverridePath $DeployPath
 
     $effectiveDeployPath = Resolve-DeployTarget -Config $config -OverridePath $DeployPath
-    $deployedAppDir = Join-Path $effectiveDeployPath "gitmap-cli"
+    $deployedAppDir = Join-Path $effectiveDeployPath $script:AppSubdir
     $deployedBinaryPath = Join-Path $deployedAppDir $config.binaryName
 
     # Persist the resolved target so future runs (and the config-binary
