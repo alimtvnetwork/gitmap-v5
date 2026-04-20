@@ -64,7 +64,7 @@ func TestCollectTempCleanupDirsIncludesTempAndDerivedTargets(t *testing.T) {
 
 	dirs := collectTempCleanupDirs("E:/bin-run/gitmap.exe", "/repo", config)
 	assertHasCleanupDir(t, dirs, os.TempDir())
-	assertHasCleanupDir(t, dirs, "E:/gitmap")
+	assertHasCleanupDir(t, dirs, "E:/gitmap-cli")
 	assertHasCleanupDir(t, dirs, "/repo/bin")
 }
 
