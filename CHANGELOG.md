@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.19.1 — (2026-04-20) — Exhaustive PATH sweep in uninstall-quick scripts
+
+### Fixed (uninstall)
+
+- **`uninstall-quick.ps1` and `uninstall-quick.sh` now do an exhaustive PATH sweep** as a final step, after the canonical `gitmap self-uninstall` and the deploy-folder sweep have run. Previously, if a stray `gitmap.exe` / `gitmap` binary lived outside the known deploy roots (e.g. a manually-copied shim in `C:\Tools\gitmap.exe`, `~/bin/gitmap`, or a leftover from an old install in `D:\gitmap\gitmap.exe`), it would survive the uninstall and `gitmap` would still resolve in the shell.
+- **PowerShell**: `Get-AllGitmapOnPath` uses `Get-Command gitmap -All` (not just the first match) AND directly walks every `Machine` + `User` PATH entry probing for `gitmap.exe` / `gitmap`. Each unique location is `Remove-Item`-ed; the parent dirs are then stripped from the User PATH via `Remove-DirsFromUserPath`.
+- **Bash**: `find_all_gitmap_on_path` iterates `$PATH` explicitly (since `command -v` only returns the first hit), de-dupes, and removes each binary. Falls back to `sudo rm -f` for `/usr/*` and `/opt/*` paths.
+
 ## v3.19.0 — (2026-04-20) — Bare release auto-bumps minor + scan-dir multi-repo release
 
 ### Added (release)
