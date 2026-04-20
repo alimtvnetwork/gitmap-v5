@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased — `gitmap install clean-code` PowerShell IRM | IEX coding-guidelines installer
+
+> Pending the next `gitmap r` minor bump (per the rule that any code change must bump at least minor). Once cut, this section will be renamed to the resolved `vX.Y.0` heading.
+
+### Added (install)
+
+- **`gitmap install clean-code`** (and the equivalent aliases `code-guide`, `cg`, `cc`) installs the alimtvnetwork coding-guidelines (v15) into the current directory by piping the published `install.ps1` through PowerShell. The flow is: resolve `powershell` (preferred on Windows) or `pwsh` (fallback / non-Windows), then exec `irm <DefaultCleanCodeURL> | iex` with `-NoProfile -ExecutionPolicy Bypass`. On non-Windows hosts the user gets an explicit note that PowerShell 7+ is required. All four aliases route through a single `cleanCodeAliases` set so dispatch and validation stay in sync.
+- **Tab-completion exposure** for the new install tokens: `clean-code`, `code-guide`, and `cc` are now emitted as top-level entries by the completion generator via a new `// gitmap:cmd top-level` block in `gitmap/constants/constants_cleancode.go`. `cg` is intentionally left to its existing owner (`changelog-generate`) to avoid shadowing top-level dispatch — `gitmap install cg` still works because `runInstall` parses its own positional argument and routes it through `cleanCodeAliases`.
+
+### Files
+
+- New: `gitmap/cmd/installcleancode.go` — `cleanCodeAliases` set, `isCleanCodeAlias`, `runInstallCleanCode`, `resolvePowerShellBinary`.
+- New: `gitmap/constants/constants_cleancode.go` — `DefaultCleanCodeURL`, the `MsgCleanCode*` / `ErrCleanCodeFailed` strings, and the new `// gitmap:cmd top-level` block exposing `CmdInstallCleanCode` / `CmdInstallCleanCodeGuide` / `CmdInstallCleanCodeCC` to tab-completion.
+- Edited: `gitmap/cmd/install.go` — `validateToolName` and `executeInstall` short-circuit through `isCleanCodeAlias` so the four aliases bypass the standard `InstallToolDescriptions` map and dispatch straight to `runInstallCleanCode`.
+- Edited: `gitmap/helptext/install.md` — documents the new command and its aliases.
+- Edited: `gitmap/completion/allcommands_generated.go` — regenerated to include `cc`, `clean-code`, `code-guide` (kept in sync with the marker block).
+
+### Notes
+
+- The four aliases are argument values to `gitmap install`, not standalone top-level commands. They are surfaced through the completion marker block purely so users get tab-complete hints when typing `gitmap install <TAB>`. Direct invocation as `gitmap clean-code` is **not** wired into the dispatcher and will fall through to the unknown-command path.
+- This entry is intentionally drafted under `Unreleased` because the version bump must be performed by `gitmap r` (which writes `.gitmap/release/vX.Y.0.json` and updates `latest.json`). Per the project rule, those release-metadata files are never edited by hand.
+
 ## v3.20.0 — (2026-04-20) — `gitmap releases --all-repos` multi-repo batch view
 
 ### Added (releases)
