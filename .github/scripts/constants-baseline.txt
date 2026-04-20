@@ -1437,6 +1437,7 @@ HelpSEOWriteFlags
 HelpSSH
 HelpSafePull
 HelpScan
+HelpScanFlagGitHubDesktop
 HelpScanFlags
 HelpSetup
 HelpSf
