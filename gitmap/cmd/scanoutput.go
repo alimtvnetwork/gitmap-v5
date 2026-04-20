@@ -152,7 +152,7 @@ func writeDesktopScript(records []model.ScanRecord, outputDir string) {
 
 		return
 	}
-	fmt.Printf(constants.MsgDesktopScript, path)
+	fmt.Printf(constants.MsgDesktopScript, filepath.Base(path))
 }
 
 // resolveOutFile determines the output file path.
