@@ -104,7 +104,7 @@ func writeCloneScript(records []model.ScanRecord, outputDir string) {
 
 		return
 	}
-	fmt.Printf(constants.MsgCloneScript, path)
+	fmt.Printf(constants.MsgCloneScript, filepath.Base(path))
 }
 
 // writeDirectCloneScript writes a plain PS1 with one git clone per line.
