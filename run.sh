@@ -450,9 +450,10 @@ resolve_deploy_target() {
         local active_dir_name
         active_dir_name=$(basename "$active_dir")
 
-        # The binary lives in <deploy-target>/gitmap/gitmap
-        # So the deploy target is the parent of the gitmap/ folder
-        if [[ "$active_dir_name" == "gitmap" ]]; then
+        # The binary lives in <deploy-target>/gitmap-cli/gitmap (or the legacy
+        # <deploy-target>/gitmap/gitmap layout from pre-v3.13.11). Either way
+        # the deploy target is the parent of that wrapped folder.
+        if [[ "$active_dir_name" == "gitmap-cli" ]] || [[ "$active_dir_name" == "gitmap" ]]; then
             local deploy_target
             deploy_target=$(dirname "$active_dir")
             write_info "Deploy target: detected from PATH -> $deploy_target"
@@ -461,7 +462,7 @@ resolve_deploy_target() {
             return
         fi
 
-        # Binary is directly in a folder (not nested under gitmap/)
+        # Binary is directly in a folder (not nested under gitmap-cli/)
         local deploy_target
         deploy_target=$(dirname "$active_dir")
         write_info "Deploy target: detected from PATH -> $deploy_target"
@@ -475,16 +476,36 @@ resolve_deploy_target() {
     echo "$DEPLOY_TARGET"
 }
 
-# -- Repair legacy unwrapped layout (DFD-3) --------------------
-# If <target>/<binary> exists at the top level (not nested under
-# <target>/gitmap/), move it + sibling data/ into the gitmap/
-# subfolder. Idempotent — re-running on a correct layout is a no-op.
+# -- Repair legacy unwrapped/wrapped layout (DFD-3) ------------
+# Migrates two legacy layouts into the canonical <target>/gitmap-cli/:
+#   1) Unwrapped (pre-DFD): <target>/<binary> at top level.
+#   2) v3.6.0..v3.13.10 wrapped: <target>/gitmap/ folder (renamed to
+#      gitmap-cli on Unix in v3.13.11 for parity with run.ps1, which
+#      did the same rename in v3.6.0).
+# Idempotent — re-running on a correct gitmap-cli/ layout is a no-op.
 repair_deploy_layout() {
     local target="$1"
-    local app_dir="$target/gitmap"
+    local app_dir="$target/gitmap-cli"
+    local legacy_app_dir="$target/gitmap"
     local legacy_binary="$target/$BINARY_NAME"
     local wrapped_binary="$app_dir/$BINARY_NAME"
 
+    # --- Migration 2: legacy gitmap/ folder -> gitmap-cli/ ----
+    # Run BEFORE the unwrapped check so a stray top-level binary inside
+    # an otherwise-correct legacy install gets folded in correctly.
+    if [[ -d "$legacy_app_dir" ]] && [[ "$legacy_app_dir" != "$app_dir" ]]; then
+        if [[ -d "$app_dir" ]]; then
+            write_warn "Layout: both gitmap/ and gitmap-cli/ exist at $target — leaving legacy gitmap/ for manual review"
+        else
+            if mv "$legacy_app_dir" "$app_dir" 2>/dev/null; then
+                write_info "Layout: migrated legacy gitmap/ -> gitmap-cli/ at $target"
+            else
+                write_warn "Layout: could not rename $legacy_app_dir -> $app_dir"
+            fi
+        fi
+    fi
+
+    # --- Migration 1: legacy unwrapped binary -> gitmap-cli/ --
     if [[ ! -f "$legacy_binary" ]]; then
         write_info "Layout: OK (no legacy binary at $target)"
         return
@@ -508,11 +529,11 @@ repair_deploy_layout() {
         dst="$app_dir/$name"
         [[ ! -e "$src" ]] && continue
         if [[ -e "$dst" ]]; then
-            write_info "Layout: $name already inside gitmap/, skipping move"
+            write_info "Layout: $name already inside gitmap-cli/, skipping move"
             continue
         fi
         if mv "$src" "$dst" 2>/dev/null; then
-            write_info "Layout: moved $name -> gitmap/$name"
+            write_info "Layout: moved $name -> gitmap-cli/$name"
         else
             write_warn "Layout: could not move $name"
         fi
@@ -682,10 +703,11 @@ deploy_binary() {
     write_info "Target: $target"
     mkdir -p "$target"
 
-    # Migrate legacy unwrapped layout (DFD-3) BEFORE we resolve $app_dir.
+    # Migrate legacy unwrapped or v3.13.10-and-older gitmap/ layout
+    # into the canonical gitmap-cli/ (DFD-3) BEFORE we resolve $app_dir.
     repair_deploy_layout "$target"
 
-    local app_dir="$target/gitmap"
+    local app_dir="$target/gitmap-cli"
     mkdir -p "$app_dir"
 
     # Pre-deploy cleanup (DFD-6) — runs BEFORE the new binary is copied.
