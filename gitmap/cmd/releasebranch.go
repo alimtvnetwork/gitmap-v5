@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/release"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/release"
 )
 
 // runReleaseBranch handles the 'release-branch' command.

@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // CheckOnline verifies network connectivity by dialing a remote host.

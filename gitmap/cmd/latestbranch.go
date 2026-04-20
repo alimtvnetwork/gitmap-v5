@@ -7,8 +7,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/gitutil"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/gitutil"
 )
 
 // latestBranchConfig holds parsed flags for the latest-branch command.

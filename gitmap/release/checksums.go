@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/verbose"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/verbose"
 )
 
 // GenerateChecksums computes SHA256 hashes for all assets and writes

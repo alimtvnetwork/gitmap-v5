@@ -58,7 +58,7 @@ jobs:
         working-directory: gitmap
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          LDFLAGS="-s -w -X 'github.com/user/gitmap/constants.Version=$VERSION'"
+          LDFLAGS="-s -w -X 'github.com/alimtvnetwork/gitmap-v5/gitmap/constants.Version=$VERSION'"
 
           TARGETS=(
             "windows/amd64/.exe"
@@ -82,7 +82,7 @@ jobs:
         working-directory: gitmap-updater
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          LDFLAGS="-s -w -X 'github.com/user/gitmap-updater/cmd.Version=$VERSION'"
+          LDFLAGS="-s -w -X 'github.com/alimtvnetwork/gitmap-v5/gitmap-updater/cmd.Version=$VERSION'"
 
           TARGETS=(
             "windows/amd64/.exe"

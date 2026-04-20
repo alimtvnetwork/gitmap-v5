@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // copyFileContent copies file content from source to destination.

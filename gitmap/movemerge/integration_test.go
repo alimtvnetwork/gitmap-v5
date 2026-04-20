@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // TestRunMerge_PreferNewer_BothSidesByteEqual creates two temp

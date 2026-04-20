@@ -12,8 +12,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/scripts"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/scripts"
 )
 
 // selfInstallOpts holds parsed flags for self-install.

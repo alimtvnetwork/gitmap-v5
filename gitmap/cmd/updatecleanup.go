@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // runUpdateCleanup handles the "update-cleanup" subcommand.

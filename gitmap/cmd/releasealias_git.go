@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // runReleaseAliasPull runs `git pull --ff-only` in target. Aborts on failure.

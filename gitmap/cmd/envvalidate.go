@@ -5,7 +5,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // envNamePattern validates environment variable names.

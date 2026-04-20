@@ -3,7 +3,7 @@ package cmd_test
 import (
 	"testing"
 
-	"github.com/user/gitmap/cmd"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/cmd"
 )
 
 func TestFormatSeq_TwoDigits(t *testing.T) {

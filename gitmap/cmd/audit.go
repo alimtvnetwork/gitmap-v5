@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/user/gitmap/model"
-	"github.com/user/gitmap/store"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/store"
 )
 
 // recordAuditStart inserts a new history record at command start.

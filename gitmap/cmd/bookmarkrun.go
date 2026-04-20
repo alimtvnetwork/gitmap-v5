@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // runBookmarkRun loads a bookmark by name and dispatches the saved command.

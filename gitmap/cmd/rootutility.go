@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/helptext"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/helptext"
 )
 
 // isFlagToken returns true when arg looks like a CLI flag (-x or --xx).

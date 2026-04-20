@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/store"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/store"
 )
 
 // templateFile represents the JSON structure for seed/custom templates.

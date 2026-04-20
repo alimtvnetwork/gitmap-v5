@@ -138,7 +138,7 @@ The build step embeds the **absolute path of the source repo** into the
 binary via Go `-ldflags`:
 
 ```powershell
-$ldflags = "-X 'github.com/user/gitmap/constants.RepoPath=$absRepoRoot'"
+$ldflags = "-X 'github.com/alimtvnetwork/gitmap-v5/gitmap/constants.RepoPath=$absRepoRoot'"
 go build -ldflags $ldflags -o $outPath .
 ```
 

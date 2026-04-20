@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/verbose"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/verbose"
 )
 
 // CompressAssets wraps each file in assets into an archive.

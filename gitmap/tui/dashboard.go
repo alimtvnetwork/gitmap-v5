@@ -5,9 +5,9 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/gitutil"
-	"github.com/user/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/gitutil"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
 )
 
 // statusEntry holds computed git status for one repo.

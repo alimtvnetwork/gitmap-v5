@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 type updateCleanupConfig struct {

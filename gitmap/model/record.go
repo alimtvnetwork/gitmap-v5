@@ -1,7 +1,7 @@
 // Package model defines the core data structures for gitmap.
 package model
 
-import "github.com/user/gitmap/constants"
+import "github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 
 // ScanRecord holds all information about a discovered Git repository.
 type ScanRecord struct {

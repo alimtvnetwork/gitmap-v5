@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/setup"
-	"github.com/user/gitmap/store"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/setup"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/store"
 )
 
 // mustLoadSetupConfig loads the resolved setup config or exits.

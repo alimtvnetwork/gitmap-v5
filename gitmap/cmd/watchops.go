@@ -3,8 +3,8 @@ package cmd
 import (
 	"os"
 
-	"github.com/user/gitmap/gitutil"
-	"github.com/user/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/gitutil"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
 )
 
 // watchSnapshot holds a single repo's watch status.

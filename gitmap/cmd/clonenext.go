@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/user/gitmap/clonenext"
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/desktop"
-	"github.com/user/gitmap/gitutil"
-	"github.com/user/gitmap/lockcheck"
-	"github.com/user/gitmap/model"
-	"github.com/user/gitmap/verbose"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/clonenext"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/desktop"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/gitutil"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/lockcheck"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/verbose"
 )
 
 // runCloneNext handles the "clone-next" subcommand.

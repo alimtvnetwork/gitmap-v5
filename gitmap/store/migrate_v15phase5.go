@@ -16,7 +16,7 @@ package store
 import (
 	"fmt"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // migrateV15Phase5 renames Release.Draft → IsDraft and Release.PreRelease → IsPreRelease.

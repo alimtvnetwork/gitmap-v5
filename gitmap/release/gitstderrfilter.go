@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // filteredStderrWriter wraps an underlying writer (typically os.Stderr) and

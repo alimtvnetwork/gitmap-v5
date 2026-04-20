@@ -7,8 +7,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/model"
 )
 
 // runHistory handles the "history" subcommand.

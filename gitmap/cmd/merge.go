@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/user/gitmap/constants"
-	"github.com/user/gitmap/movemerge"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/movemerge"
 )
 
 // mergeSpec describes one merge variant for the dispatcher.

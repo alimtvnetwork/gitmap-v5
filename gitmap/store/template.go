@@ -4,7 +4,7 @@ package store
 import (
 	"fmt"
 
-	"github.com/user/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
 // CommitTemplate represents a single commit message template.
