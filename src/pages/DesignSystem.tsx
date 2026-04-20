@@ -280,7 +280,7 @@ const DesignSystemPage = () => {
                   <li>Keyboard shortcuts inside <code className="docs-inline-code">&lt;kbd&gt;</code></li>
                 </ul>
                 <div className="text-xs text-muted-foreground pt-2 border-t border-border">
-                  <span className="text-rose-400">✗ Don't:</span> use <code className="docs-inline-code">font-mono</code> for prose, badges, chips, or section titles for "techy vibes".
+                  <span className="text-destructive">✗ Don't:</span> use <code className="docs-inline-code">font-mono</code> for prose, badges, chips, or section titles for "techy vibes".
                 </div>
               </div>
             </div>
