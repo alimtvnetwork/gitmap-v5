@@ -59,17 +59,34 @@ function Confirm-Or-Exit([string]$prompt) {
 # ---------------------------------------------------------------------------
 
 function Try-SelfUninstall {
-    $cmd = Get-Command gitmap -ErrorAction SilentlyContinue
+    # Get-Command can return MULTIPLE ApplicationInfo entries when stale
+    # binaries from a prior install (e.g. drive-root shim + nested
+    # gitmap-cli/) are both on PATH. Interpolating the array into a
+    # string would join the .Source paths with a space and PowerShell
+    # would later treat that joined string as a command name —
+    # producing the error:
+    #   The term 'E:\gitmap\gitmap.exe E:\bin-run\gitmap-cli\gitmap.exe'
+    #   is not recognized as a name of a cmdlet ...
+    # Always pick the first entry (the one PATH would actually invoke).
+    $cmd = Get-Command gitmap -ErrorAction SilentlyContinue | Select-Object -First 1
     if (-not $cmd) {
         Write-Info "gitmap not found on PATH, skipping self-uninstall (will sweep manually)"
         return $false
     }
 
-    Write-Info "Active binary: $($cmd.Source)"
-    Write-Info "Delegating to: gitmap self-uninstall -y"
+    $activeBinary = [string]$cmd.Source
+    if ([string]::IsNullOrWhiteSpace($activeBinary)) {
+        Write-Info "Active binary path was empty; skipping self-uninstall (will sweep manually)"
+        return $false
+    }
+
+    Write-Info "Active binary: $activeBinary"
+    Write-Info "Delegating to: $activeBinary self-uninstall -y"
     Write-Host ""
     try {
-        & gitmap self-uninstall -y
+        # Invoke by absolute path (not by 'gitmap') so PATH-resolution
+        # quirks can't pick a different binary than the one we logged.
+        & $activeBinary self-uninstall -y
         if ($LASTEXITCODE -eq 0) {
             Write-Ok "self-uninstall completed cleanly"
             return $true
