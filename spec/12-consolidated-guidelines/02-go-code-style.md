@@ -52,6 +52,24 @@ Every literal used for comparison, defaults, or messages goes in `constants`.
 | Constants | PascalCase | `DefaultBranch` |
 | Files | Lowercase, single word | `terminal.go` |
 
+## `constants/` Naming — Domain Prefix Required
+
+Every **new** constant in `gitmap/constants/` must start with one of five canonical prefixes. Enforced by `.github/scripts/check-constants-naming.sh` against a grandfathered baseline (`.github/scripts/constants-baseline.txt`); legacy prefixes (`Doctor*`, `Git*`, `Tool*`, `Term*`, `Choco*`, `Brew*`, `Apt*`, `Hint*`, …) are exempt only because they pre-date the rule.
+
+| Prefix | Use for | Example |
+|--------|---------|---------|
+| `CmdXxx` | Command names and aliases | `CmdScan`, `CmdReleaseAlias` |
+| `MsgXxx` | User-facing strings, format templates, prompts | `MsgReleaseScanHeader`, `MsgPullDone` |
+| `ErrXxx` | Error messages and Go-idiomatic sentinel errors | `ErrNoDatabase`, `ErrLatestBranchNoRefs` |
+| `FlagXxx` | Flag names and descriptions | `FlagDryRun`, `FlagDescBump` |
+| `DefaultXxx` | Default values used when no override is provided | `DefaultBranch`, `DefaultReleaseDir` |
+
+After an approved rename pass, regenerate the baseline:
+
+```bash
+bash .github/scripts/check-constants-naming.sh --regenerate-baseline
+```
+
 ## Error Handling
 
 Check errors immediately. Return errors up the stack. In `cmd` handlers: print and `os.Exit(1)`. Never `panic` for expected conditions.
