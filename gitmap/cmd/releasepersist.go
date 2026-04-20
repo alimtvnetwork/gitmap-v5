@@ -30,7 +30,7 @@ func persistReleaseToDB() {
 		fmt.Fprintf(os.Stderr, "  ⚠ Release DB migration failed: %v\n", err)
 	}
 
-	repoID, err := resolveCurrentRepoID(db)
+	repoID, err := resolveOrRegisterCurrentRepoID(db)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "  ⚠ Could not resolve repo for release: %v\n", err)
 
@@ -50,6 +50,27 @@ func resolveCurrentRepoID(db *store.DB) (int64, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return 0, err
+	}
+
+	return db.ResolveCurrentRepoID(cwd)
+}
+
+// resolveOrRegisterCurrentRepoID first tries to resolve the cwd's RepoId;
+// when the repo is not yet registered, it auto-registers (parent dir =
+// ScanFolder, cwd = Repo) and re-resolves. This makes `gitmap r` self-
+// healing on a fresh clone where `gitmap scan` was never run.
+func resolveOrRegisterCurrentRepoID(db *store.DB) (int64, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return 0, err
+	}
+
+	if id, err := db.ResolveCurrentRepoID(cwd); err == nil {
+		return id, nil
+	}
+
+	if err := autoRegisterCurrentRepo(db, cwd); err != nil {
+		return 0, fmt.Errorf("auto-register failed: %w", err)
 	}
 
 	return db.ResolveCurrentRepoID(cwd)
