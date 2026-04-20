@@ -159,6 +159,16 @@ const (
 	DoctorDupBinTitle = "Multiple gitmap binaries on PATH"
 )
 
+// Doctor Release↔Repo integrity messages.
+const (
+	DoctorNoOrphans        = "Release↔Repo integrity: no orphaned rows"
+	DoctorOrphanedReleases = "%d orphaned Release row(s) with invalid RepoId"
+	DoctorOrphanedDetail   = "These releases reference a Repo that no longer exists in the database."
+	DoctorOrphanedFix      = "Run: gitmap list-releases (re-imports from .gitmap/release/v*.json with valid RepoId)"
+	DoctorReposNoReleases  = "%d repo(s) have no releases (run 'gitmap list-releases' in each repo to populate)"
+	DoctorIntegrityFail    = "Release↔Repo integrity check failed: %v"
+)
+
 // Doctor setup config messages.
 const (
 	DoctorSetupConfigMissing = "git-setup.json not found (setup will fail without --config)"

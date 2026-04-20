@@ -40,6 +40,7 @@ func runDoctorChecks() int {
 	issues += checkSetupConfig()
 	issues += checkShellWrapper()
 	issues += checkDatabase()
+	issues += checkReleaseRepoIntegrity()
 	issues += checkLockFile()
 	issues += checkNetwork()
 	issues += checkLegacyDirs()
