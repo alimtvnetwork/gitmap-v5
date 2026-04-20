@@ -1,5 +1,34 @@
 # Changelog
 
+## v3.25.2 — (2026-04-20) — Fix `HelpGitHubDesktop` redeclaration build error
+
+### Fixed (Build)
+
+- **`go build` no longer fails with `HelpGitHubDesktop redeclared in this block`** between `constants/constants_helpsections.go:13` and `constants/constants_cli.go:100`.
+
+### Root cause
+
+v3.25.0 introduced a new top-level `HelpGitHubDesktop` constant in `constants_cli.go` for the `github-desktop (gd)` command help line. However, `constants_helpsections.go` already exported a constant of the same name (since pre-v3.0) for the `--github-desktop` **scan flag** help line. Both files compile into the same `constants` package, so the namespace collision broke the build for everyone who pulled v3.25.0 / v3.25.1.
+
+The pre-existing constant was the older one and is only consumed by `cmd/rootusageflags.go` (the `--github-desktop` scan-flag help block), so it was renamed to `HelpScanFlagGitHubDesktop` to disambiguate by purpose. The newer command-line help constant in `constants_cli.go` keeps the original `HelpGitHubDesktop` name since it represents the canonical `github-desktop` command.
+
+### Fix
+
+- Renamed scan-flag help constant: `HelpGitHubDesktop` → `HelpScanFlagGitHubDesktop` in `constants/constants_helpsections.go`.
+- Updated sole consumer `cmd/rootusageflags.go` to reference the renamed constant.
+- Inserted `HelpScanFlagGitHubDesktop` into `.github/scripts/constants-baseline.txt` in sorted order (between `HelpScan` and `HelpScanFlags`).
+
+### Files (this section)
+
+- Edited: `gitmap/constants/constants_helpsections.go` — renamed `HelpGitHubDesktop` → `HelpScanFlagGitHubDesktop`.
+- Edited: `gitmap/cmd/rootusageflags.go` — updated reference.
+- Edited: `.github/scripts/constants-baseline.txt` — added `HelpScanFlagGitHubDesktop`.
+- Edited: `gitmap/constants/constants.go` — bumped Version to 3.25.2.
+- Created: `.gitmap/release/v3.25.2.json` — release metadata.
+- Edited: `.gitmap/release/latest.json` — pointer to v3.25.2.
+
+---
+
 ## v3.25.1 — (2026-04-20) — CI: portable awk in constants-naming guard (fixes silent exit 1 on Ubuntu runners)
 
 ### Fixed (CI)
