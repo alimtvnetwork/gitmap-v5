@@ -13,7 +13,15 @@ import (
 )
 
 // runRelease handles the 'release' command.
+//
+// Form 1 — `gitmap r vX.Y.Z`         : in-place release of the current repo.
+// Form 2 — `gitmap r <repo> vX.Y.Z`  : cross-dir — chdir into <repo>, fetch
+//                                       + pull --rebase, release, chdir back.
+// See `releaserebase.go` for the cross-dir machinery.
 func runRelease(args []string) {
+	if tryCrossDirRelease(args) {
+		return
+	}
 	checkHelp("release", args)
 
 	version, assets, commit, branch, bump, notes, targets, zipGroups, zipItems, bundleName, draft, dryRun, verbose, compress, checksums, bin, listTargets, noCommit, yes := parseReleaseFlags(args)

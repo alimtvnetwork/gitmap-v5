@@ -18,7 +18,15 @@ import (
 )
 
 // runCloneNext handles the "clone-next" subcommand.
+//
+// Form 1 — `gitmap cn vX.Y.Z`         : operates on the current repo.
+// Form 2 — `gitmap cn <repo> vX.Y.Z`  : cross-dir — chdir into <repo>, run
+//                                        clone-next, chdir back. See
+//                                        `clonenextcrossdir.go`.
 func runCloneNext(args []string) {
+	if tryCrossDirCloneNext(args) {
+		return
+	}
 	checkHelp("clone-next", args)
 	versionArg, deleteFlag, keepFlag, noDesktop, createRemote, sshKeyName, verboseMode := parseCloneNextFlags(args)
 	if len(versionArg) == 0 {
