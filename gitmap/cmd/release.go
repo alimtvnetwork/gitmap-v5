@@ -17,14 +17,6 @@ import (
 func runRelease(args []string) {
 	checkHelp("release", args)
 
-	// Auto-fallback: if not inside a Git repo, self-release.
-	if !release.IsInsideGitRepo() {
-		runReleaseSelf(args)
-
-		return
-	}
-
-	requireOnline()
 	version, assets, commit, branch, bump, notes, targets, zipGroups, zipItems, bundleName, draft, dryRun, verbose, compress, checksums, bin, listTargets, noCommit, yes := parseReleaseFlags(args)
 	_ = verbose
 
@@ -34,8 +26,39 @@ func runRelease(args []string) {
 		return
 	}
 
+	// Auto-fallback when not inside a Git repo.
+	if !release.IsInsideGitRepo() {
+		if shouldAutoBumpMinor(version, bump, commit, branch) && tryRunReleaseScanDir(yes) {
+			return
+		}
+		runReleaseSelf(args)
+
+		return
+	}
+
+	requireOnline()
+	bump = applyBareReleaseAutoBump(version, bump, commit, branch, yes)
 	validateReleaseFlags(version, bump, commit, branch)
 	executeRelease(version, assets, commit, branch, bump, notes, targets, zipGroups, zipItems, bundleName, draft, dryRun, verbose, compress, checksums, bin, noCommit, yes)
+}
+
+// applyBareReleaseAutoBump injects bump=minor when no explicit version/bump
+// was provided, after confirming with the user (skipped with -y).
+func applyBareReleaseAutoBump(version, bump, commit, branch string, yes bool) string {
+	if !shouldAutoBumpMinor(version, bump, commit, branch) {
+		return bump
+	}
+
+	current, next, ok := peekNextMinorVersion()
+	if !ok {
+		return bump
+	}
+	if !confirmAutoBump(current, next, yes) {
+		fmt.Fprint(os.Stderr, constants.MsgReleaseAutoBumpAborted)
+		os.Exit(1)
+	}
+
+	return constants.BumpMinor
 }
 
 // executeRelease builds options and runs the release workflow.
