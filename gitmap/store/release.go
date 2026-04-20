@@ -9,20 +9,24 @@ import (
 )
 
 // UpsertRelease inserts or updates a release record in the database.
-// v15: persists IsDraft / IsPreRelease columns.
+// v17: requires RepoID FK pointing at an existing Repo row.
 func (db *DB) UpsertRelease(r model.ReleaseRecord) error {
+	if r.RepoID == 0 {
+		return fmt.Errorf(constants.ErrReleaseNoRepo, "<unset>")
+	}
+
 	isDraft := boolToInt(r.IsDraft)
 	isPreRelease := boolToInt(r.IsPreRelease)
 	isLatest := boolToInt(r.IsLatest)
 
 	if r.IsLatest {
-		if err := db.clearLatest(); err != nil {
+		if err := db.clearLatest(r.RepoID); err != nil {
 			return err
 		}
 	}
 
 	_, err := db.conn.Exec(constants.SQLUpsertRelease,
-		r.Version, r.Tag, r.Branch, r.SourceBranch,
+		r.RepoID, r.Version, r.Tag, r.Branch, r.SourceBranch,
 		r.CommitSha, r.Changelog, r.Notes, isDraft, isPreRelease, isLatest, r.Source, r.CreatedAt,
 	)
 	if err != nil {
@@ -50,9 +54,9 @@ func (db *DB) FindReleaseByTag(tag string) (model.ReleaseRecord, error) {
 	return scanOneRelease(row)
 }
 
-// clearLatest resets the IsLatest flag on all existing releases.
-func (db *DB) clearLatest() error {
-	_, err := db.conn.Exec(constants.SQLClearLatestRelease)
+// clearLatest resets the IsLatest flag on releases for a given repo (v17: per-repo scope).
+func (db *DB) clearLatest(repoID int64) error {
+	_, err := db.conn.Exec(constants.SQLClearLatestRelease, repoID)
 	if err != nil {
 		return fmt.Errorf(constants.ErrDBReleaseUpsert, err)
 	}
@@ -79,11 +83,12 @@ func scanReleaseRows(rows interface {
 }
 
 // scanOneReleaseRow reads a single ReleaseRecord from a row scanner.
+// v17: RepoId is now part of the projected column list.
 func scanOneReleaseRow(row interface{ Scan(dest ...any) error }) (model.ReleaseRecord, error) {
 	var r model.ReleaseRecord
 	var isDraft, isPreRelease, isLatest int
 
-	err := row.Scan(&r.ID, &r.Version, &r.Tag, &r.Branch, &r.SourceBranch,
+	err := row.Scan(&r.ID, &r.RepoID, &r.Version, &r.Tag, &r.Branch, &r.SourceBranch,
 		&r.CommitSha, &r.Changelog, &r.Notes, &isDraft, &isPreRelease, &isLatest, &r.Source, &r.CreatedAt)
 	if err != nil {
 		return model.ReleaseRecord{}, err
@@ -117,4 +122,19 @@ func boolToInt(b bool) int {
 	}
 
 	return 0
+}
+
+// ResolveCurrentRepoID returns the RepoId for the repo at absPath. Returns 0
+// and an error when the repo has not been scanned (caller should advise the
+// user to run `gitmap scan` first).
+func (db *DB) ResolveCurrentRepoID(absPath string) (int64, error) {
+	repos, err := db.FindByPath(absPath)
+	if err != nil {
+		return 0, err
+	}
+	if len(repos) == 0 {
+		return 0, fmt.Errorf(constants.ErrReleaseNoRepo, absPath)
+	}
+
+	return repos[0].ID, nil
 }
