@@ -383,9 +383,11 @@ install_binary() {
     local archive_path="$1" install_dir="$2" os="$3" arch="$4" version="$5"
 
     # DFD-1/DFD-3: nested layout. install_dir is the deploy ROOT (e.g.
-    # ~/.local/bin); the actual app folder is ${install_dir}/${BINARY_NAME}.
+    # ~/.local/bin); the actual app folder is ${install_dir}/gitmap-cli.
+    # The folder name was renamed from ${BINARY_NAME} ("gitmap") to
+    # "gitmap-cli" in v3.13.11 for cross-platform parity with run.ps1.
     repair_layout "${install_dir}"
-    local app_dir="${install_dir}/${BINARY_NAME}"
+    local app_dir="${install_dir}/gitmap-cli"
     cleanup_prior_artifacts "${install_dir}" "${app_dir}"
 
     step "Installing to ${app_dir}..."
