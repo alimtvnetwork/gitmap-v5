@@ -53,7 +53,7 @@ func saveScanCache(outputDir string, cache model.ScanCache) {
 
 		return
 	}
-	fmt.Printf(constants.MsgScanCacheSaved, path)
+	fmt.Printf(constants.MsgScanCacheSaved, filepath.Base(path))
 }
 
 // runScanFromCache replays a scan using cached flags.
