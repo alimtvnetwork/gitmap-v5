@@ -52,8 +52,6 @@ var generatedCommands = []string{
 	"ex",
 	"exec",
 	"export",
-	"find-next",
-	"fn",
 	"g",
 	"gm",
 	"go",
