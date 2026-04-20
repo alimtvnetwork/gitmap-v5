@@ -96,12 +96,49 @@ func loadAllRecordsDB() []model.ScanRecord {
 	return records
 }
 
-// loadRecordsJSONFallback loads records from gitmap.json.
+// loadRecordsJSONFallback loads records from .gitmap/output/gitmap.json.
+// If the JSON file is missing (e.g. user has not run `gitmap scan` from this
+// exact directory), fall through to the database — the DB is the source of
+// truth post-v2 and usually has every repo the user has ever scanned.
+//
+// Bug fix (v3.32.0): previously this looked at the legacy bare "output/"
+// path AND exited with an error when the file was missing, even though the
+// DB had perfectly good data. Users hit this whenever they ran `gitmap status`
+// from a directory they had never scanned (e.g. a parent shell prompt).
 func loadRecordsJSONFallback() []model.ScanRecord {
-	jsonPath := filepath.Join(constants.DefaultOutputFolder, constants.DefaultJSONFile)
+	jsonPath := filepath.Join(constants.DefaultOutputDir, constants.DefaultJSONFile)
+	if _, statErr := os.Stat(jsonPath); os.IsNotExist(statErr) {
+		return loadAllRecordsDBOrEmpty()
+	}
 	records, err := loadStatusRecords(jsonPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrStatusLoadFailed, jsonPath, err)
+		os.Exit(1)
+	}
+
+	return records
+}
+
+// loadAllRecordsDBOrEmpty returns DB records, or exits with a friendly
+// "run gitmap scan first" message when the DB has no repos yet.
+func loadAllRecordsDBOrEmpty() []model.ScanRecord {
+	db, err := openDB()
+	if err != nil {
+		fmt.Fprint(os.Stderr, constants.MsgStatusNoData)
+		os.Exit(1)
+	}
+	defer db.Close()
+	records, err := db.ListRepos()
+	if err != nil {
+		if isLegacyDataError(err) {
+			fmt.Fprint(os.Stderr, constants.MsgLegacyProjectData)
+			os.Exit(1)
+		}
+		fmt.Fprintf(os.Stderr, constants.ErrGenericFmt, err)
+		os.Exit(1)
+	}
+	if len(records) == 0 {
+		fmt.Fprint(os.Stderr, constants.MsgStatusNoData)
 		os.Exit(1)
 	}
 
