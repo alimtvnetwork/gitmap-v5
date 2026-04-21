@@ -108,6 +108,49 @@ write_report_error() {
     fi
 }
 
+# -- Repo-detect debug -----------------------------------------
+# Active when --debug-repo-detect is passed OR GITMAP_DEBUG_REPO_DETECT=1
+# (set by `gitmap update --debug-repo-detect`). Prints structured marker
+# checks and decision reasons. Mirrors entries to JSONL report when
+# --report-errors json is also active.
+is_debug_repo_detect() {
+    [[ "${DEBUG_REPO_DETECT:-false}" == "true" ]] || [[ "${GITMAP_DEBUG_REPO_DETECT:-}" == "1" ]]
+}
+
+write_repo_detect() {
+    local check="$1"
+    local result="$2"
+    local detail="${3:-}"
+    if ! is_debug_repo_detect; then
+        return 0
+    fi
+    if [[ -n "$detail" ]]; then
+        printf "  ${CYAN}[DETECT]${NC} %-28s = %s  ${GRAY}(%s)${NC}\n" "$check" "$result" "$detail"
+    else
+        printf "  ${CYAN}[DETECT]${NC} %-28s = %s\n" "$check" "$result"
+    fi
+    # Mirror to JSONL report file when active.
+    write_report_error "repo-detect" "$check" 0 "$result" \
+        "{\"detail\":\"${detail//\"/\\\"}\",\"level\":\"info\"}"
+}
+
+write_repo_detect_snippet() {
+    local title="$1"
+    local path="$2"
+    local max_lines="${3:-6}"
+    if ! is_debug_repo_detect; then
+        return 0
+    fi
+    echo -e "  ${CYAN}[DETECT]${NC} ${title} :"
+    if [[ ! -f "$path" ]]; then
+        echo -e "    ${GRAY}(file not found: $path)${NC}"
+        return 0
+    fi
+    head -n "$max_lines" "$path" 2>/dev/null | sed "s/^/    /" | while IFS= read -r line; do
+        echo -e "${GRAY}${line}${NC}"
+    done
+}
+
 # -- Banner ----------------------------------------------------
 show_banner() {
     echo ""
