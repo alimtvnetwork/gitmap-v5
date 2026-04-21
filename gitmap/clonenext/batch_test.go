@@ -8,8 +8,10 @@ import (
 	"testing"
 )
 
-// TestLoadBatchFromCSV_HeaderlessSinglePath verifies the simplest case:
-// one row, no header, one column.
+// ---------------------------------------------------------------------------
+// LoadBatchFromCSV — header + column tests
+// ---------------------------------------------------------------------------
+
 func TestLoadBatchFromCSV_HeaderlessSinglePath(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "list.csv")
@@ -27,8 +29,6 @@ func TestLoadBatchFromCSV_HeaderlessSinglePath(t *testing.T) {
 	}
 }
 
-// TestLoadBatchFromCSV_WithHeaderAndExtraColumns verifies the header row
-// is skipped and ragged extra columns are ignored.
 func TestLoadBatchFromCSV_WithHeaderAndExtraColumns(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "list.csv")
@@ -43,7 +43,23 @@ func TestLoadBatchFromCSV_WithHeaderAndExtraColumns(t *testing.T) {
 	}
 }
 
-// TestLoadBatchFromCSV_EmptyReturnsSentinel verifies the soft-fail sentinel.
+func TestLoadBatchFromCSV_NamedPathColumnNotFirst(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "list.csv")
+	writeFile(t, path, "name,path,note\nalpha,./alpha-dir,some note\nbeta,./beta-dir,\n")
+
+	got, err := LoadBatchFromCSV(path)
+	if err != nil {
+		t.Fatalf("LoadBatchFromCSV: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("got %d rows, want 2", len(got))
+	}
+	if !strings.HasSuffix(got[0], "alpha-dir") {
+		t.Errorf("row 0 = %q, want suffix alpha-dir", got[0])
+	}
+}
+
 func TestLoadBatchFromCSV_EmptyReturnsSentinel(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "list.csv")
@@ -55,8 +71,94 @@ func TestLoadBatchFromCSV_EmptyReturnsSentinel(t *testing.T) {
 	}
 }
 
-// TestWalkBatchFromDir_OnlyGitDirsIncluded verifies non-git subdirs are
-// filtered out and results are sorted.
+// ---------------------------------------------------------------------------
+// BOM + line endings
+// ---------------------------------------------------------------------------
+
+func TestLoadBatchFromCSV_BOMStripped(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "bom.csv")
+	// UTF-8 BOM + "repo" header
+	bom := "\xEF\xBB\xBFrepo,note\n./r1,bom test\n"
+	writeFile(t, path, bom)
+
+	got, err := LoadBatchFromCSV(path)
+	if err != nil {
+		t.Fatalf("LoadBatchFromCSV (BOM): %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("got %d rows, want 1 (BOM header was not recognized?)", len(got))
+	}
+}
+
+func TestLoadBatchFromCSV_WindowsCRLF(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "crlf.csv")
+	writeFile(t, path, "repo,note\r\n./a,one\r\n./b,two\r\n")
+
+	got, err := LoadBatchFromCSV(path)
+	if err != nil {
+		t.Fatalf("LoadBatchFromCSV (CRLF): %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("got %d rows, want 2", len(got))
+	}
+}
+
+func TestLoadBatchFromCSV_BareCR(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "cr.csv")
+	// Classic macOS CR-only line endings
+	writeFile(t, path, "repo\r./a\r./b\r")
+
+	got, err := LoadBatchFromCSV(path)
+	if err != nil {
+		t.Fatalf("LoadBatchFromCSV (bare CR): %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("got %d rows, want 2 (bare CR not normalized?)", len(got))
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Missing optional columns (ragged rows)
+// ---------------------------------------------------------------------------
+
+func TestLoadBatchFromCSV_MissingOptionalColumns(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "ragged.csv")
+	// Header has 3 columns; data rows may have fewer.
+	writeFile(t, path, "repo,version,note\n./a\n./b,v2\n./c,v3,some note\n")
+
+	got, err := LoadBatchFromCSV(path)
+	if err != nil {
+		t.Fatalf("LoadBatchFromCSV (ragged): %v", err)
+	}
+	if len(got) != 3 {
+		t.Fatalf("got %d rows, want 3", len(got))
+	}
+}
+
+func TestLoadBatchFromCSV_PathColumnMissedInShortRow(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "short.csv")
+	// Path is column 2 ("path") but some rows only have 1 cell.
+	writeFile(t, path, "name,tag,path\nalpha,v1,./a\nbeta\n")
+
+	got, err := LoadBatchFromCSV(path)
+	if err != nil {
+		t.Fatalf("LoadBatchFromCSV: %v", err)
+	}
+	// beta row is too short to have a path — should be silently skipped.
+	if len(got) != 1 {
+		t.Fatalf("got %d rows, want 1 (short row should have been skipped)", len(got))
+	}
+}
+
+// ---------------------------------------------------------------------------
+// WalkBatchFromDir
+// ---------------------------------------------------------------------------
+
 func TestWalkBatchFromDir_OnlyGitDirsIncluded(t *testing.T) {
 	root := t.TempDir()
 	mkRepo(t, filepath.Join(root, "zeta"))
@@ -77,7 +179,6 @@ func TestWalkBatchFromDir_OnlyGitDirsIncluded(t *testing.T) {
 	}
 }
 
-// TestWalkBatchFromDir_NoReposReturnsSentinel verifies the soft-fail path.
 func TestWalkBatchFromDir_NoReposReturnsSentinel(t *testing.T) {
 	root := t.TempDir()
 
@@ -87,7 +188,10 @@ func TestWalkBatchFromDir_NoReposReturnsSentinel(t *testing.T) {
 	}
 }
 
-// writeFile writes content to path and fails the test on error.
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
 func writeFile(t *testing.T, path, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
@@ -95,7 +199,6 @@ func writeFile(t *testing.T, path, content string) {
 	}
 }
 
-// mkRepo creates a minimal git-repo-shaped directory at path (mkdir + .git).
 func mkRepo(t *testing.T, path string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Join(path, ".git"), 0o755); err != nil {
