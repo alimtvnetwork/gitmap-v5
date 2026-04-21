@@ -110,6 +110,7 @@ export const commands: CommandDef[] = [
       { command: "gitmap scan all --prune-missing", description: "Cron-friendly: auto-prune unreachable roots" },
     ],
     seeAlso: [
+      { name: "Spec: scan all", description: "Full specification document", url: "/scan-all" },
       { name: "scan", description: "Single-root scan (the source that populates ScanFolder)" },
       { name: "rescan", description: "Repeat the most recent single-root scan" },
       { name: "sf list", description: "Inspect the ScanFolder table directly" },

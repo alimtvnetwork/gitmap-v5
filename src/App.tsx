@@ -47,6 +47,7 @@ import InstallPage from "./pages/Install";
 import HelpDashboardPage from "./pages/HelpDashboard";
 import PostMortemsPage from "./pages/PostMortems";
 import VersionHistoryPage from "./pages/VersionHistory";
+import ScanAllSpecPage from "./pages/ScanAllSpec";
 
 const queryClient = new QueryClient();
 
@@ -100,6 +101,7 @@ const App = () => (
           <Route path="/install" element={<InstallPage />} />
           <Route path="/help-dashboard" element={<HelpDashboardPage />} />
           <Route path="/post-mortems" element={<PostMortemsPage />} />
+          <Route path="/scan-all" element={<ScanAllSpecPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
