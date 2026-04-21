@@ -5,14 +5,30 @@ package clonenext
 // Two entry points feed the same dispatcher:
 //
 //   - LoadBatchFromCSV: read a curated list of repo paths from a CSV file
-//     (header optional; only the first column matters).
+//     (header optional; column lookup by name when a header is present).
 //   - WalkBatchFromDir: scan one level under a directory and return every
 //     subdirectory that is itself a git repo.
 //
 // Both return absolute paths in deterministic (lexicographic) order so that
 // re-runs and report rows stay stable.
+//
+// CSV-parsing contract (hardened in v3.43.2):
+//
+//   - Line endings: LF, CRLF, and bare-CR are all accepted. Bare-CR is
+//     pre-normalized to LF so Go's encoding/csv (which only splits on LF)
+//     handles classic-Mac-style files saved by old tools.
+//   - BOM: a leading UTF-8 BOM (Excel-on-Windows default) is stripped
+//     before parsing so the first cell of row 0 still matches header
+//     keywords like "repo".
+//   - Columns: when a header is present, the path column is located by
+//     name ("repo" | "path" | "repo_path", case-insensitive). Optional
+//     columns like "note", "version", or "tag" may appear in any order
+//     and are ignored. Headerless input continues to use column 0.
+//   - Ragged rows: rows with fewer cells than the path column or with an
+//     empty path cell are skipped silently — they are not data.
 
 import (
+	"bytes"
 	"encoding/csv"
 	"errors"
 	"io"
@@ -26,30 +42,70 @@ import (
 // any candidate repos. Callers surface this as a soft warning, not a crash.
 var ErrBatchEmpty = errors.New("clonenext: batch input contained no repos")
 
+// utf8BOM is the three-byte UTF-8 byte-order mark.
+var utf8BOM = []byte{0xEF, 0xBB, 0xBF}
+
+// pathHeaderAliases is the set of header cell values that mark the path
+// column. Lookup is case-insensitive; trimmed before comparison.
+var pathHeaderAliases = map[string]struct{}{
+	"repo":      {},
+	"path":      {},
+	"repo_path": {},
+	"repopath":  {},
+}
+
 // LoadBatchFromCSV reads a CSV file and returns one absolute repo path per
-// non-empty data row. The first column is treated as the path; additional
-// columns are ignored so users can keep notes/version overrides alongside.
-//
-// Header detection: if the first cell of row 0 (case-folded) equals "repo"
-// or "path", row 0 is skipped. Otherwise it is treated as data.
+// non-empty data row. See the package doc-comment for the full parsing
+// contract (BOM, line endings, header detection, optional columns).
 func LoadBatchFromCSV(path string) ([]string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	rows, err := readAllCSVRows(file)
+	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	paths := extractFirstColumn(rows)
+	rows, err := readAllCSVRows(bytes.NewReader(normalizeCSVBytes(raw)))
+	if err != nil {
+		return nil, err
+	}
+
+	paths := extractPathColumn(rows)
 	if len(paths) == 0 {
 		return nil, ErrBatchEmpty
 	}
 
 	return absoluteAndSorted(paths), nil
+}
+
+// normalizeCSVBytes strips a leading UTF-8 BOM and converts bare-CR line
+// endings to LF. CRLF is left intact so Excel/Notepad output keeps its
+// line shape; encoding/csv handles CRLF natively.
+func normalizeCSVBytes(in []byte) []byte {
+	in = bytes.TrimPrefix(in, utf8BOM)
+
+	return convertBareCRToLF(in)
+}
+
+// convertBareCRToLF replaces every '\r' that is NOT followed by '\n' with
+// '\n'. Used for classic-Mac line endings that encoding/csv won't split.
+func convertBareCRToLF(in []byte) []byte {
+	out := make([]byte, 0, len(in))
+	for i := 0; i < len(in); i++ {
+		if in[i] != '\r' {
+			out = append(out, in[i])
+
+			continue
+		}
+		if i+1 < len(in) && in[i+1] == '\n' {
+			// CRLF — keep both bytes; csv.Reader strips the CR.
+			out = append(out, '\r', '\n')
+			i++
+
+			continue
+		}
+		out = append(out, '\n')
+	}
+
+	return out
 }
 
 // readAllCSVRows reads every row from r using the standard CSV parser with
@@ -62,24 +118,18 @@ func readAllCSVRows(r io.Reader) ([][]string, error) {
 	return cr.ReadAll()
 }
 
-// extractFirstColumn pulls the first non-empty cell of each row, skipping
-// a header row when one is detected.
-func extractFirstColumn(rows [][]string) []string {
+// extractPathColumn returns the path cell from each data row, handling
+// both header-present and header-absent inputs.
+func extractPathColumn(rows [][]string) []string {
 	if len(rows) == 0 {
 		return nil
 	}
 
-	startIdx := 0
-	if isHeaderRow(rows[0]) {
-		startIdx = 1
-	}
+	colIdx, startIdx := resolvePathColumn(rows)
 
 	out := make([]string, 0, len(rows)-startIdx)
 	for _, row := range rows[startIdx:] {
-		if len(row) == 0 {
-			continue
-		}
-		cell := strings.TrimSpace(row[0])
+		cell := safeCell(row, colIdx)
 		if len(cell) > 0 {
 			out = append(out, cell)
 		}
@@ -88,15 +138,48 @@ func extractFirstColumn(rows [][]string) []string {
 	return out
 }
 
-// isHeaderRow returns true when the first cell looks like a column label
-// rather than a real path.
-func isHeaderRow(row []string) bool {
-	if len(row) == 0 {
-		return false
+// resolvePathColumn inspects row 0 and returns (column-index, first-data-row).
+// If row 0 looks like a header, it is consumed and the path column is
+// located by name. Otherwise column 0 is used and row 0 is data.
+func resolvePathColumn(rows [][]string) (colIdx, startIdx int) {
+	header := rows[0]
+	if !looksLikeHeader(header) {
+		return 0, 0
 	}
-	first := strings.ToLower(strings.TrimSpace(row[0]))
+	for i, cell := range header {
+		key := strings.ToLower(strings.TrimSpace(cell))
+		if _, ok := pathHeaderAliases[key]; ok {
+			return i, 1
+		}
+	}
 
-	return first == "repo" || first == "path" || first == "repo_path"
+	// Header detected but no recognized path-column name — fall back to
+	// column 0 and still skip the header row so labels aren't treated
+	// as paths.
+	return 0, 1
+}
+
+// looksLikeHeader returns true when the row contains at least one cell
+// matching a known path-column alias.
+func looksLikeHeader(row []string) bool {
+	for _, cell := range row {
+		key := strings.ToLower(strings.TrimSpace(cell))
+		if _, ok := pathHeaderAliases[key]; ok {
+			return true
+		}
+	}
+
+	return false
+}
+
+// safeCell returns row[idx] trimmed, or "" when the row has fewer columns
+// than expected. Prevents index-out-of-range on ragged data rows.
+func safeCell(row []string, idx int) string {
+	if idx < 0 || idx >= len(row) {
+		return ""
+	}
+
+	return strings.TrimSpace(row[idx])
 }
 
 // WalkBatchFromDir returns every immediate subdirectory of root that is
