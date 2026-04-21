@@ -12,6 +12,7 @@ import Config from "./pages/Config";
 import Architecture from "./pages/Architecture";
 import Watch from "./pages/Watch";
 import Release from "./pages/Release";
+import ReleaseVersionPage from "./pages/ReleaseVersion";
 import MakefilePage from "./pages/Makefile";
 import HistoryPage from "./pages/History";
 import StatsPage from "./pages/Stats";
