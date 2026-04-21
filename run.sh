@@ -518,13 +518,22 @@ copy_docs_site() {
     if [[ -f "$root_pkg" ]] && command -v npm &>/dev/null && grep -q '"build"' "$root_pkg"; then
         if [[ ! -d "$REPO_ROOT/node_modules" ]] || [[ ! -x "$REPO_ROOT/node_modules/.bin/vite" ]]; then
             write_info "Installing docs dependencies (npm install) at repo root..."
-            if ! (cd "$REPO_ROOT" && npm install --no-audit --no-fund --silent >/dev/null 2>&1); then
+            local install_exit=0
+            (cd "$REPO_ROOT" && npm install --no-audit --no-fund --silent >/dev/null 2>&1) || install_exit=$?
+            if [[ $install_exit -ne 0 ]]; then
                 write_warn "npm install failed - skipping docs build"
+                write_report_error "docs-npm-install" \
+                    "npm install --no-audit --no-fund --silent" \
+                    "$install_exit" \
+                    "npm install failed at repo root; docs build skipped" \
+                    "{\"repoRoot\":\"${REPO_ROOT//\"/\\\"}\",\"packageJson\":\"${root_pkg//\"/\\\"}\"}"
                 return
             fi
         fi
         write_info "Auto-building docs (npm run build) at repo root..."
-        if (cd "$REPO_ROOT" && npm run build >/dev/null 2>&1) && [[ -d "$root_dist" ]]; then
+        local build_exit=0
+        (cd "$REPO_ROOT" && npm run build >/dev/null 2>&1) || build_exit=$?
+        if [[ $build_exit -eq 0 ]] && [[ -d "$root_dist" ]]; then
             local dist_dest="$docs_dest/dist"
             rm -rf "$dist_dest"
             mkdir -p "$docs_dest"
@@ -533,6 +542,11 @@ copy_docs_site() {
             return
         fi
         write_warn "Auto-build failed - 'gitmap hd' will fail"
+        write_report_error "docs-npm-build" \
+            "npm run build" \
+            "$build_exit" \
+            "npm run build did not produce dist/ output" \
+            "{\"repoRoot\":\"${REPO_ROOT//\"/\\\"}\",\"expectedDist\":\"${root_dist//\"/\\\"}\",\"packageJson\":\"${root_pkg//\"/\\\"}\"}"
         return
     fi
 
