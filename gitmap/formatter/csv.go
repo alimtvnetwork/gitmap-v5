@@ -9,7 +9,13 @@ import (
 )
 
 // WriteCSV writes records to the given writer in CSV format.
+//
+// Records are validated first; per-issue warnings are emitted to the
+// configured sink (default os.Stderr) but the write always proceeds.
+// See validate.go for the warn-and-write policy.
 func WriteCSV(w io.Writer, records []model.ScanRecord) error {
+	emitValidationWarnings(records)
+
 	cw := csv.NewWriter(w)
 	err := cw.Write(constants.ScanCSVHeaders)
 	if err != nil {
