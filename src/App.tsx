@@ -12,6 +12,7 @@ import Config from "./pages/Config";
 import Architecture from "./pages/Architecture";
 import Watch from "./pages/Watch";
 import Release from "./pages/Release";
+import ReleaseVersionPage from "./pages/ReleaseVersion";
 import MakefilePage from "./pages/Makefile";
 import HistoryPage from "./pages/History";
 import StatsPage from "./pages/Stats";
@@ -69,6 +70,7 @@ const App = () => (
           <Route path="/architecture" element={<Architecture />} />
           <Route path="/watch" element={<Watch />} />
           <Route path="/release" element={<Release />} />
+          <Route path="/release/:version" element={<ReleaseVersionPage />} />
           <Route path="/gomod" element={<GoMod />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/makefile" element={<MakefilePage />} />
