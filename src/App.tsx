@@ -69,6 +69,7 @@ const App = () => (
           <Route path="/architecture" element={<Architecture />} />
           <Route path="/watch" element={<Watch />} />
           <Route path="/release" element={<Release />} />
+          <Route path="/release/:version" element={<ReleaseVersionPage />} />
           <Route path="/gomod" element={<GoMod />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/makefile" element={<MakefilePage />} />
