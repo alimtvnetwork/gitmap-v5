@@ -50,6 +50,7 @@ const pages = [
   { title: "Profile", url: "/profile" },
   { title: "Diff Profiles", url: "/diff-profiles" },
   { title: "Spec Index", url: "/spec" },
+  { title: "Spec: scan all", url: "/scan-all" },
 ];
 
 const CommandPalette = () => {
