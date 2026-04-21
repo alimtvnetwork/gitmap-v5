@@ -39,9 +39,13 @@ param(
     [Alias("t")]
     [switch]$Test,
     [switch]$DebugRepoDetect,
+    [switch]$Quiet,
     [Parameter(ValueFromRemainingArguments=$true)]
     [string[]]$RunArgs
 )
+
+# Honor env-var bridge from `gitmap update --quiet` (or callers that set it).
+if ($env:GITMAP_QUIET -eq "1") { $Quiet = $true }
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -162,6 +166,45 @@ function Write-RepoDetectSnippet {
     } catch {
         Write-Host "    (could not read: $_)" -ForegroundColor DarkGray
     }
+}
+
+# -- npm wrapper ----------------------------------------------
+# Invoke-NpmQuiet runs an npm subcommand (e.g. install, run build) with
+# $ErrorActionPreference temporarily relaxed to 'Continue' so that npm's
+# stderr progress chatter is NOT promoted to a terminating
+# NativeCommandError under the script-wide 'Stop' preference. The previous
+# preference is ALWAYS restored via finally{}, even on exceptions.
+#
+# When $Quiet (or $env:GITMAP_QUIET=1) is active, all npm output is
+# discarded and only a single "[npm] <cmd> exit=<code>" line is logged.
+# Otherwise output streams to the terminal as usual. The function returns
+# the npm exit code so callers can branch on it.
+function Invoke-NpmQuiet {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string[]]$NpmArgs
+    )
+
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $exitCode = 0
+    try {
+        if ($script:Quiet) {
+            & npm @NpmArgs *>&1 | Out-Null
+        } else {
+            & npm @NpmArgs
+        }
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $prevEAP
+    }
+
+    if ($script:Quiet) {
+        Write-Host ("  [npm] {0} exit={1}" -f ($NpmArgs -join ' '), $exitCode) -ForegroundColor DarkGray
+    }
+
+    return $exitCode
 }
 
 # -- Banner ----------------------------------------------------
@@ -756,8 +799,7 @@ function Copy-DocsSite {
                 $viteBin = Join-Path $nodeModules ".bin\vite.cmd"
                 if (-not (Test-Path $nodeModules) -or -not (Test-Path $viteBin)) {
                     Write-Info "Installing docs dependencies (npm install) at repo root..."
-                    npm install --no-audit --no-fund --silent 2>&1 | Out-Null
-                    $installExit = $LASTEXITCODE
+                    $installExit = Invoke-NpmQuiet -NpmArgs @('install','--no-audit','--no-fund','--silent')
                     if ($installExit -ne 0) {
                         Write-Warn "npm install failed - skipping docs build"
                         Write-ReportError -Stage "docs-npm-install" `
@@ -770,8 +812,7 @@ function Copy-DocsSite {
                     }
                 }
                 Write-Info "Auto-building docs (npm run build) at repo root..."
-                npm run build 2>&1 | Out-Null
-                $buildExit = $LASTEXITCODE
+                $buildExit = Invoke-NpmQuiet -NpmArgs @('run','build')
                 if ($buildExit -eq 0 -and (Test-Path $rootDist)) {
                     $distDest = Join-Path $docsDest "dist"
                     if (Test-Path $distDest) { Remove-Item $distDest -Recurse -Force }
