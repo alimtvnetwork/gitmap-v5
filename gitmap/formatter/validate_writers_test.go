@@ -25,7 +25,7 @@ func TestWriteJSON_EmitsWarningsButStillWrites(t *testing.T) {
 		t.Fatalf("WriteJSON: %v", err)
 	}
 
-	assertSinkAndOutput(t, &sink, &out, "good", `"repoName":"good"`)
+	assertSinkAndOutput(t, &sink, &out, "good", `"repoName": "good"`)
 }
 
 // TestWriteCSV_EmitsWarningsButStillWrites mirrors the JSON test for CSV.
