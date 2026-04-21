@@ -150,12 +150,13 @@ func printChangelogEntries(entries []release.ChangelogEntry, limit int) {
 	}
 }
 
-// printChangelogEntry prints a single changelog entry.
+// printChangelogEntry prints a single changelog entry using the new
+// pretty renderer (header rule + colored version + indented bullets with
+// inline-markdown styling and word wrapping). The legacy bare format is
+// still available via constants.ChangelogVersionFmt / ChangelogNoteFmt
+// for any caller that wants raw output.
 func printChangelogEntry(entry release.ChangelogEntry) {
-	fmt.Printf(constants.ChangelogVersionFmt+"\n", entry.Version)
-	for _, note := range entry.Notes {
-		fmt.Printf(constants.ChangelogNoteFmt+"\n", note)
-	}
+	renderChangelogEntry(entry)
 }
 
 // openChangelogFile opens CHANGELOG.md with the default OS app.
