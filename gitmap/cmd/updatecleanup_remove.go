@@ -4,8 +4,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
+)
+
+// cleanupRemoveMaxAttempts caps the retry loop for transient Windows file locks
+// (e.g. a freshly-renamed .old still settling, or AV scanners holding a handle).
+const (
+	cleanupRemoveMaxAttempts = 5
+	cleanupRemoveRetryDelay  = 200 * time.Millisecond
 )
 
 // cleanupTempArtifacts removes update handoff copies and generated scripts.
