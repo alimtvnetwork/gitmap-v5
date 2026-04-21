@@ -699,11 +699,36 @@ add_to_path() {
     # fish (only if fish is installed or is the default shell)
     if [ "${shell_name}" = "fish" ] || command -v fish >/dev/null 2>&1; then
         local fish_config="${HOME}/.config/fish/config.fish"
-        if add_path_to_profile "${dir}" "${fish_config}" true; then
+        if add_path_to_profile "${dir}" "${fish_config}" fish; then
             profiles_written="${profiles_written} ~/.config/fish/config.fish"
         else
             profiles_skipped="${profiles_skipped} ~/.config/fish/config.fish"
         fi
+    fi
+
+    # PowerShell on Unix — detected when the installer was launched from
+    # inside a pwsh session (PSModulePath is set), or when pwsh is on PATH.
+    # Issue: spec/02-app-issues/29-macos-pwsh-shell-not-activated-after-install.md
+    local pwsh_active=false
+    if detect_active_pwsh; then
+        pwsh_active=true
+    fi
+    if [ "${pwsh_active}" = true ] || command -v pwsh >/dev/null 2>&1; then
+        local pwsh_profile
+        pwsh_profile="$(pwsh_profile_path)"
+        if add_path_to_profile "${dir}" "${pwsh_profile}" pwsh; then
+            profiles_written="${profiles_written} ~/.config/powershell/Microsoft.PowerShell_profile.ps1"
+        else
+            profiles_skipped="${profiles_skipped} ~/.config/powershell/Microsoft.PowerShell_profile.ps1"
+        fi
+    fi
+
+    # If the user is actively in pwsh, the pwsh profile becomes the primary
+    # reload target — overrides $SHELL-based detection (which on macOS still
+    # reports zsh even when pwsh is the active interpreter).
+    if [ "${pwsh_active}" = true ]; then
+        PATH_SHELL="pwsh"
+        shell_name="pwsh"
     fi
 
     # Determine primary profile for reload instruction
