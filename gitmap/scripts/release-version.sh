@@ -181,12 +181,25 @@ resolve_requested_version() {
         exit $EXIT_VERSION_MISSING
     fi
 
-    if [ "$QUIET" -eq 1 ] || [ ! -t 0 ] || [ ! -t 1 ]; then
+    if ! is_interactive; then
         err "Non-interactive run; refusing to substitute. Use --allow-fallback to opt in."
         exit $EXIT_VERSION_MISSING
     fi
 
     interactive_pick
+}
+
+# is_interactive returns 0 only when we can safely prompt for input.
+# We require: not --quiet, not running under CI, AND a real /dev/tty.
+# Checking only `[ -t 0 ]` is wrong for `curl ... | bash` because bash's
+# stdin is the pipe — but /dev/tty still points at the user's keyboard
+# in that case, so the prompt is still possible.
+is_interactive() {
+    [ "$QUIET" -eq 1 ] && return 1
+    [ "${CI:-}" = "true" ] || [ "${CI:-}" = "1" ] && return 1
+    [ -r /dev/tty ] || return 1
+    [ -w /dev/tty ] || return 1
+    return 0
 }
 
 resolve_fallback_patch() {
@@ -213,6 +226,7 @@ interactive_pick() {
     local i=1
     local -a choices=()
     echo "" >&2
+    echo "  Requested: $VERSION (not found)" >&2
     echo "  Most recent published releases:" >&2
     while IFS= read -r tag; do
         choices+=("$tag")
@@ -221,8 +235,14 @@ interactive_pick() {
     done <<< "$recent"
     echo "    [N] Quit (default)" >&2
     printf "  Pick a number to install instead, or N to quit: " >&2
+
     local reply=""
-    read -r reply </dev/tty || reply="N"
+    if ! read -r reply </dev/tty; then
+        echo "" >&2
+        err "Could not read from /dev/tty; aborting."
+        exit $EXIT_VERSION_MISSING
+    fi
+
     if [ -z "$reply" ] || [[ "$reply" =~ ^[Nn] ]]; then
         exit $EXIT_VERSION_MISSING
     fi
