@@ -45,6 +45,7 @@ NO_PATH=0
 NO_SELF_INSTALL=0
 ALLOW_FALLBACK=0
 QUIET=0
+JSON_ERRORS=0
 TMP_DIR=""
 
 # Exit codes (spec 105)
@@ -57,14 +58,59 @@ EXIT_PATH_FAIL=5
 EXIT_SELF_INSTALL=6
 EXIT_VERIFY=7
 
+# Stable error code symbols (contract for JSON consumers).
+ERR_INVALID_VERSION="INVALID_VERSION"
+ERR_VERSION_NOT_FOUND="VERSION_NOT_FOUND"
+ERR_NO_FALLBACK="NO_FALLBACK_AVAILABLE"
+ERR_NON_INTERACTIVE="NON_INTERACTIVE_NO_SUBSTITUTE"
+ERR_RECENT_LIST_FAILED="RECENT_LIST_FAILED"
+ERR_USER_DECLINED="USER_DECLINED"
+ERR_INVALID_CHOICE="INVALID_CHOICE"
+ERR_NETWORK="NETWORK_ERROR"
+ERR_CHECKSUM_MISMATCH="CHECKSUM_MISMATCH"
+ERR_UNSUPPORTED_OS="UNSUPPORTED_OS"
+ERR_UNSUPPORTED_ARCH="UNSUPPORTED_ARCH"
+ERR_NO_ASSET="NO_MATCHING_ASSET"
+ERR_EXTRACT_FAILED="EXTRACT_FAILED"
+ERR_VERSION_MISMATCH="VERSION_MISMATCH"
+ERR_SELF_INSTALL="SELF_INSTALL_FAILED"
+
 cleanup() { [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ] && rm -rf "$TMP_DIR"; }
 trap cleanup EXIT
 
 # ── Logging (ASCII only) ───────────────────────────────────────────
-step() { [ "$QUIET" -eq 1 ] || printf '  -> %s\n' "$*" >&2; }
-ok()   { [ "$QUIET" -eq 1 ] || printf '  OK %s\n' "$*" >&2; }
-warn() { [ "$QUIET" -eq 1 ] || printf '  !  %s\n' "$*" >&2; }
-err()  { printf '  X  %s\n' "$*" >&2; }
+# Suppress all human-readable output when --json-errors is active so the
+# JSON payload on stderr is the only thing consumers parse.
+step() { [ "$QUIET" -eq 1 ] || [ "$JSON_ERRORS" -eq 1 ] || printf '  -> %s\n' "$*" >&2; }
+ok()   { [ "$QUIET" -eq 1 ] || [ "$JSON_ERRORS" -eq 1 ] || printf '  OK %s\n' "$*" >&2; }
+warn() { [ "$QUIET" -eq 1 ] || [ "$JSON_ERRORS" -eq 1 ] || printf '  !  %s\n' "$*" >&2; }
+err()  { [ "$JSON_ERRORS" -eq 1 ] || printf '  X  %s\n' "$*" >&2; }
+
+# json_escape escapes a value for safe inclusion in a JSON string literal.
+# Handles backslash, double-quote, newline, tab — sufficient for our payloads.
+json_escape() {
+    printf '%s' "$1" \
+        | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' \
+        | awk 'BEGIN{ORS="\\n"} {print}' \
+        | sed 's/\\n$//'
+}
+
+# fatal_error <code> <message> <exit_code> [details_json]
+# Emits either a structured JSON error or a human-readable one, then exits.
+fatal_error() {
+    local code="$1" message="$2" exit_code="$3" details="${4:-{\}}"
+    if [ "$JSON_ERRORS" -eq 1 ]; then
+        local esc_msg esc_code esc_ver
+        esc_msg="$(json_escape "$message")"
+        esc_code="$(json_escape "$code")"
+        esc_ver="$(json_escape "$VERSION")"
+        printf '{"error":{"code":"%s","message":"%s","exitCode":%d,"requestedVersion":"%s","script":"release-version.sh","details":%s}}\n' \
+            "$esc_code" "$esc_msg" "$exit_code" "$esc_ver" "$details" >&2
+    else
+        err "$message [code=$code]"
+    fi
+    exit "$exit_code"
+}
 
 # ── Arg parsing ─────────────────────────────────────────────────────
 while [ $# -gt 0 ]; do
