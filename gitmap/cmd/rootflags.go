@@ -7,7 +7,7 @@ import (
 )
 
 // parseScanFlags parses flags for the scan command.
-func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outputPath string, ghDesktop, openFolder, quiet bool) {
+func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outputPath string, ghDesktop, openFolder, quiet, noVSCodeSync bool) {
 	fs := flag.NewFlagSet(constants.CmdScan, flag.ExitOnError)
 	cfgFlag := fs.String("config", constants.DefaultConfigPath, constants.FlagDescConfig)
 	modeFlag := fs.String("mode", "", constants.FlagDescMode)
@@ -15,11 +15,12 @@ func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outp
 	outFileFlag := fs.String("out-file", "", constants.FlagDescOutFile)
 	outputPathFlag := fs.String("output-path", "", constants.FlagDescOutputPath)
 	ghDesktopFlag, openFlag, quietFlag := registerScanBoolFlags(fs)
+	noVSCodeSyncFlag := fs.Bool(constants.FlagNoVSCodeSync, false, constants.FlagDescNoVSCodeSync)
 	fs.Parse(args)
 
 	dir = resolveScanDir(fs)
 
-	return dir, *cfgFlag, *modeFlag, *outputFlag, *outFileFlag, *outputPathFlag, *ghDesktopFlag, *openFlag, *quietFlag
+	return dir, *cfgFlag, *modeFlag, *outputFlag, *outFileFlag, *outputPathFlag, *ghDesktopFlag, *openFlag, *quietFlag, *noVSCodeSyncFlag
 }
 
 // registerScanBoolFlags registers boolean flags for the scan command.
