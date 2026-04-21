@@ -790,19 +790,26 @@ function Copy-DocsSite {
                 -Message "npm run build did not produce dist/ output" `
                 -Paths @{ repoRoot = $RepoRoot; expectedDist = $rootDist; packageJson = $rootPkg }
             return
+        } else {
+            Write-RepoDetect -Check "decision" -Result "skip-no-build-script" -Detail "package.json has no `"build`" entry"
         }
+    } else {
+        $skipReason = if (-not (Test-Path $rootPkg)) { "no package.json" } elseif (-not $npmCmd) { "npm not on PATH" } else { "unknown" }
+        Write-RepoDetect -Check "decision" -Result "skip-not-a-vite-repo" -Detail $skipReason
     }
 
     # 2. Legacy <repo>/docs-site/ source-only (npm-dev fallback)
     if (Test-Path $legacyDir) {
         # fall through to existing source-copy block below
     } else {
+        Write-RepoDetect -Check "decision" -Result "no-docs-source"
         Write-Warn "No docs found (checked docs-site/dist, docs-site/, dist/) - 'gitmap hd' will fail"
         return
     }
 
     # 2. Legacy <repo>/docs-site/ source-only — npm-dev fallback (no prebuilt dist).
     # Copy everything except node_modules to keep the deploy lean.
+    Write-RepoDetect -Check "decision" -Result "use-legacy-source" -Detail $legacyDir
     if (Test-Path $docsDest) {
         Remove-Item $docsDest -Recurse -Force
     }
