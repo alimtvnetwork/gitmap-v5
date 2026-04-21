@@ -147,8 +147,23 @@ func TestProjectsJSONPath_MissingRootReturnsSentinel(t *testing.T) {
 // create the alefragnani.project-manager subtree, asserting the second
 // sentinel fires.
 func TestProjectsJSONPath_RootExistsExtMissingReturnsSentinel(t *testing.T) {
-	root := t.TempDir()
-	pointEnvAt(t, root)
+	if runtime.GOOS == "darwin" {
+		t.Skip("darwin user-data path is too deep to fake cleanly in a temp dir")
+	}
+
+	parent := t.TempDir()
+	// The resolver appends "Code" to APPDATA / XDG_CONFIG_HOME, so create it.
+	codeDir := filepath.Join(parent, "Code")
+	if err := os.MkdirAll(codeDir, 0o755); err != nil {
+		t.Fatalf("mkdir Code: %v", err)
+	}
+
+	clearAllVSCodeEnv(t)
+	if runtime.GOOS == "windows" {
+		t.Setenv("APPDATA", parent)
+	} else {
+		t.Setenv("XDG_CONFIG_HOME", parent)
+	}
 
 	_, err := ProjectsJSONPath()
 	if !errors.Is(err, ErrExtensionMissing) {
