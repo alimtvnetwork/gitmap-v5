@@ -157,6 +157,8 @@ func (db *DB) Migrate() error {
 		constants.SQLCreateScanFolderPathIndex,
 		constants.SQLCreateVersionProbe,
 		constants.SQLCreateVersionProbeRepoIndex,
+		constants.SQLCreateVSCodeProject,
+		constants.SQLCreateVSCodeProjectRootPathIndex,
 	}
 
 	for _, stmt := range statements {
@@ -336,6 +338,7 @@ func (db *DB) Reset() error {
 		constants.SQLDropInstalledTools, // legacy
 		constants.SQLDropRepoVersionHistory,
 		constants.SQLDropVersionProbe,
+		constants.SQLDropVSCodeProject,
 		constants.SQLDropScanFolder,
 		constants.SQLDropRepo,
 		constants.SQLDropRepos, // legacy

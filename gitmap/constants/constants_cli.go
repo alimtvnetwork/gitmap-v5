@@ -82,6 +82,7 @@ const (
 	CmdSelfUninstall         = "self-uninstall"
 	CmdSf                    = "sf"
 	CmdProbe                 = "probe"
+	CmdCode                  = "code"
 )
 
 // Usage header.

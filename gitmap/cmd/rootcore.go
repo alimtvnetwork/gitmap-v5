@@ -54,6 +54,11 @@ func dispatchCore(command string) bool {
 
 		return true
 	}
+	if command == constants.CmdCode {
+		runCode(os.Args[2:])
+
+		return true
+	}
 
 	return false
 }

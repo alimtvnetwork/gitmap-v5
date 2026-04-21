@@ -61,6 +61,7 @@ func createOrUpdateAliasRow(db *store.DB, name string, repoID int64, rec model.S
 		}
 		fmt.Printf(constants.MsgAsRegisteredFmt, rec.RepoName, name, rec.AbsolutePath)
 		fmt.Printf(constants.MsgAsHintNext, name)
+		renameVSCodePMByPath(rec.AbsolutePath, name)
 
 		return
 	}
@@ -81,4 +82,5 @@ func createOrUpdateAliasRow(db *store.DB, name string, repoID int64, rec model.S
 
 	fmt.Printf(constants.MsgAsUpdatedFmt, name, rec.RepoName, rec.AbsolutePath)
 	fmt.Printf(constants.MsgAsHintNext, name)
+	renameVSCodePMByPath(rec.AbsolutePath, name)
 }
