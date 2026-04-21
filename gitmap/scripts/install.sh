@@ -736,18 +736,26 @@ add_to_path() {
         zsh)    primary_profile="${HOME}/.zshrc" ;;
         bash)   primary_profile="${HOME}/.bashrc" ;;
         fish)   primary_profile="${HOME}/.config/fish/config.fish" ;;
+        pwsh)   primary_profile="$(pwsh_profile_path)" ;;
         *)      primary_profile="${HOME}/.profile" ;;
     esac
 
     PATH_TARGET="${primary_profile}"
 
-    if [ "${shell_name}" = "fish" ]; then
-        PATH_LINE="fish_add_path ${dir}"
-        PATH_RELOAD="source ${primary_profile}"
-    else
-        PATH_LINE="export PATH=\"\$PATH:${dir}\""
-        PATH_RELOAD=". ${primary_profile}"
-    fi
+    case "${shell_name}" in
+        fish)
+            PATH_LINE="fish_add_path ${dir}"
+            PATH_RELOAD="source ${primary_profile}"
+            ;;
+        pwsh)
+            PATH_LINE="\$env:PATH = \"\$env:PATH:${dir}\""
+            PATH_RELOAD=". \$PROFILE"
+            ;;
+        *)
+            PATH_LINE="export PATH=\"\$PATH:${dir}\""
+            PATH_RELOAD=". ${primary_profile}"
+            ;;
+    esac
 
     # Report what was written
     if [ -n "${profiles_written}" ]; then
