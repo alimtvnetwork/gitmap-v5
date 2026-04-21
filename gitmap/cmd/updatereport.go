@@ -9,11 +9,14 @@ import (
 	"github.com/alimtvnetwork/gitmap-v5/gitmap/constants"
 )
 
-// reportErrorsConfig captures the resolved --report-errors settings.
+// reportErrorsConfig captures the resolved --report-errors and
+// --debug-repo-detect settings. Both share the same flag-propagation and
+// env-injection lifecycle, so they're bundled into one carrier struct.
 type reportErrorsConfig struct {
-	enabled bool
-	format  string
-	file    string
+	enabled         bool
+	format          string
+	file            string
+	debugRepoDetect bool
 }
 
 // resolveReportErrors reads --report-errors / --report-errors-file from
