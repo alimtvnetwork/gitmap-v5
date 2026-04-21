@@ -150,6 +150,46 @@ the binary does not have a source repo path embedded. You have three choices:
 2. **Use `--repo-path`** to point at a local clone for a one-time update.
 3. **Clone and rebuild** from source so future updates work automatically.
 
+## Reporting non-fatal failures (`--report-errors json`)
+
+The auto-build step (`npm install` and `npm run build` for the docs site) is
+intentionally non-fatal — a failed build never aborts `gitmap update`. To make
+those failures visible to CI without scraping logs, pass `--report-errors json`.
+
+Each failure is appended as one JSON object per line (JSONL) to the report
+file. The CLI prints the file path before the update starts and a summary line
+after it finishes.
+
+### Example
+
+    gitmap update --report-errors json --report-errors-file C:\logs\update.jsonl
+
+**Output (with one auto-build failure):**
+
+    -> Error report (json): C:\logs\update.jsonl
+    ...
+    !! Auto-build failed - 'gitmap hd' will fail
+    ...
+    -> Wrote 1 non-fatal failure entry to C:\logs\update.jsonl
+
+### Entry schema
+
+Each line contains a single object with these fields:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `timestamp` | string (ISO-8601 UTC) | When the failure was recorded |
+| `stage` | string | Stable identifier — currently `docs-npm-install` or `docs-npm-build` |
+| `command` | string | The exact command that failed |
+| `exitCode` | integer | Process exit code (0 if the command "succeeded" but post-conditions failed) |
+| `cwd` | string | Working directory at time of failure |
+| `message` | string | Human-readable summary |
+| `paths` | object | Stage-specific paths (e.g. `repoRoot`, `packageJson`, `expectedDist`) |
+| `os` | string | `windows` or `unix` |
+
+Without `--report-errors json`, the env vars are not set and the scripts skip
+the writer entirely — there is zero overhead for normal updates.
+
 ## See Also
 
 - [version](version.md) — Check current version
