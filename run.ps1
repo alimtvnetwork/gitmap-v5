@@ -38,6 +38,7 @@ param(
     [switch]$R,
     [Alias("t")]
     [switch]$Test,
+    [switch]$DebugRepoDetect,
     [Parameter(ValueFromRemainingArguments=$true)]
     [string[]]$RunArgs
 )
