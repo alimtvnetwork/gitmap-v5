@@ -42,11 +42,15 @@ func pushAndFinalize(v Version, branchName, tag, _ string, opts Options) error {
 	adHocAssets := buildAdHocZipAssets(opts)
 	assets = append(assets, adHocAssets...)
 
-	// Bundle docs-site for help-dashboard command.
+	// Bundle docs-site for help-dashboard command, and bake per-version
+	// snapshots of the release-version installer scripts (spec 105).
 	if stagingDir, stagingErr := EnsureStagingDir(); stagingErr == nil {
 		if docsSiteAsset := buildDocsSiteAsset(stagingDir); len(docsSiteAsset) > 0 {
 			assets = append(assets, docsSiteAsset)
 		}
+
+		snapshotAssets := buildReleaseVersionSnapshots(v.String(), stagingDir)
+		assets = append(assets, snapshotAssets...)
 	}
 
 	if opts.Compress && len(assets) > 0 {
