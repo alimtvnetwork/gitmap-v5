@@ -73,6 +73,35 @@ write_info()    { echo -e "  ${CYAN}->${NC} ${GRAY}$1${NC}"; }
 write_warn()    { echo -e "  ${YELLOW}!!${NC} ${YELLOW}$1${NC}"; }
 write_fail()    { echo -e "  ${RED}XX${NC} ${RED}$1${NC}"; }
 
+# -- Error reporting (JSONL) -----------------------------------
+# When run from `gitmap update --report-errors json`, env vars
+# GITMAP_REPORT_ERRORS=json and GITMAP_REPORT_ERRORS_FILE=<path>
+# are set. Each non-fatal failure appends one JSON object per line.
+# Args: stage command exit_code message [extra_json_object]
+write_report_error() {
+    local stage="$1"
+    local command="$2"
+    local exit_code="$3"
+    local message="$4"
+    local extra="${5:-{\}}"
+    if [[ "${GITMAP_REPORT_ERRORS:-}" != "json" ]] || [[ -z "${GITMAP_REPORT_ERRORS_FILE:-}" ]]; then
+        return 0
+    fi
+    local ts
+    ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    local cwd
+    cwd="$(pwd)"
+    # Escape backslashes and double quotes for JSON safety.
+    local esc_msg="${message//\\/\\\\}"; esc_msg="${esc_msg//\"/\\\"}"
+    local esc_cmd="${command//\\/\\\\}"; esc_cmd="${esc_cmd//\"/\\\"}"
+    local esc_cwd="${cwd//\\/\\\\}"; esc_cwd="${esc_cwd//\"/\\\"}"
+    local line
+    line="{\"timestamp\":\"${ts}\",\"stage\":\"${stage}\",\"command\":\"${esc_cmd}\",\"exitCode\":${exit_code},\"cwd\":\"${esc_cwd}\",\"message\":\"${esc_msg}\",\"paths\":${extra},\"os\":\"unix\"}"
+    if ! printf '%s\n' "$line" >> "${GITMAP_REPORT_ERRORS_FILE}" 2>/dev/null; then
+        write_warn "Could not append to report-errors file: ${GITMAP_REPORT_ERRORS_FILE}"
+    fi
+}
+
 # -- Banner ----------------------------------------------------
 show_banner() {
     echo ""

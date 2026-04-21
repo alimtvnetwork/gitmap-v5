@@ -79,6 +79,41 @@ function Write-Fail {
     Write-Host $Message -ForegroundColor Red
 }
 
+# -- Error reporting (JSONL) -----------------------------------
+# When run from `gitmap update --report-errors json`, env vars
+# GITMAP_REPORT_ERRORS=json and GITMAP_REPORT_ERRORS_FILE=<path>
+# are set. Each non-fatal failure appends one JSON object per line.
+function Write-ReportError {
+    param(
+        [string]$Stage,
+        [string]$Command,
+        [int]$ExitCode,
+        [string]$Message,
+        [hashtable]$Paths = @{}
+    )
+    $fmt = $env:GITMAP_REPORT_ERRORS
+    $file = $env:GITMAP_REPORT_ERRORS_FILE
+    if (($fmt -ne "json") -or [string]::IsNullOrWhiteSpace($file)) {
+        return
+    }
+    try {
+        $entry = [ordered]@{
+            timestamp = (Get-Date).ToUniversalTime().ToString("o")
+            stage     = $Stage
+            command   = $Command
+            exitCode  = $ExitCode
+            cwd       = (Get-Location).Path
+            message   = $Message
+            paths     = $Paths
+            os        = "windows"
+        }
+        $line = ($entry | ConvertTo-Json -Compress -Depth 5)
+        Add-Content -Path $file -Value $line -Encoding UTF8 -ErrorAction Stop
+    } catch {
+        Write-Host "  [WARN] Could not write report-errors entry: $_" -ForegroundColor Yellow
+    }
+}
+
 # -- Banner ----------------------------------------------------
 function Show-Banner {
     Write-Host ""
