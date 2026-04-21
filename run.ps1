@@ -39,9 +39,13 @@ param(
     [Alias("t")]
     [switch]$Test,
     [switch]$DebugRepoDetect,
+    [switch]$Quiet,
     [Parameter(ValueFromRemainingArguments=$true)]
     [string[]]$RunArgs
 )
+
+# Honor env-var bridge from `gitmap update --quiet` (or callers that set it).
+if ($env:GITMAP_QUIET -eq "1") { $Quiet = $true }
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
