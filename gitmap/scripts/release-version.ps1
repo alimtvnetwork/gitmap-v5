@@ -50,7 +50,8 @@ param(
     [switch]$NoPath,
     [switch]$NoSelfInstall,
     [switch]$AllowFallback,
-    [switch]$Quiet
+    [switch]$Quiet,
+    [switch]$JsonErrors
 )
 
 $ErrorActionPreference = "Stop"
@@ -70,11 +71,58 @@ $EXIT_PATH_FAIL       = 5
 $EXIT_SELF_INSTALL    = 6
 $EXIT_VERIFY          = 7
 
+# --- Error code symbols (stable contract for JSON consumers) ---
+$ERR_INVALID_VERSION    = "INVALID_VERSION"
+$ERR_VERSION_NOT_FOUND  = "VERSION_NOT_FOUND"
+$ERR_NO_FALLBACK        = "NO_FALLBACK_AVAILABLE"
+$ERR_NON_INTERACTIVE    = "NON_INTERACTIVE_NO_SUBSTITUTE"
+$ERR_RECENT_LIST_FAILED = "RECENT_LIST_FAILED"
+$ERR_USER_DECLINED      = "USER_DECLINED"
+$ERR_INVALID_CHOICE     = "INVALID_CHOICE"
+$ERR_NETWORK            = "NETWORK_ERROR"
+$ERR_CHECKSUM_MISMATCH  = "CHECKSUM_MISMATCH"
+$ERR_UNSUPPORTED_OS     = "UNSUPPORTED_OS"
+$ERR_UNSUPPORTED_ARCH   = "UNSUPPORTED_ARCH"
+$ERR_NO_ASSET           = "NO_MATCHING_ASSET"
+$ERR_EXTRACT_FAILED     = "EXTRACT_FAILED"
+$ERR_VERSION_MISMATCH   = "VERSION_MISMATCH"
+$ERR_SELF_INSTALL       = "SELF_INSTALL_FAILED"
+
 # --- Logging helpers (ASCII only — no Unicode glyphs) ---
-function Write-Step([string]$msg) { if (-not $Quiet) { Write-Host "  -> $msg" -ForegroundColor Cyan } }
-function Write-OK([string]$msg)   { if (-not $Quiet) { Write-Host "  OK $msg"  -ForegroundColor Green } }
-function Write-Warn2([string]$m)  { if (-not $Quiet) { Write-Host "  !  $m"    -ForegroundColor Yellow } }
-function Write-Err2([string]$m)   { Write-Host "  X  $m" -ForegroundColor Red }
+# All progress output suppressed when -JsonErrors is set so consumers get a
+# clean JSON payload on stderr without log noise interleaved.
+function Write-Step([string]$msg) { if (-not $Quiet -and -not $JsonErrors) { Write-Host "  -> $msg" -ForegroundColor Cyan } }
+function Write-OK([string]$msg)   { if (-not $Quiet -and -not $JsonErrors) { Write-Host "  OK $msg"  -ForegroundColor Green } }
+function Write-Warn2([string]$m)  { if (-not $Quiet -and -not $JsonErrors) { Write-Host "  !  $m"    -ForegroundColor Yellow } }
+function Write-Err2([string]$m)   { if (-not $JsonErrors) { Write-Host "  X  $m" -ForegroundColor Red } }
+
+# Write-StructuredError emits a single fatal error and exits. JSON shape:
+#   {"error":{"code":"...","message":"...","exitCode":N,"requestedVersion":"...","details":{...}}}
+function Write-StructuredError {
+    param(
+        [Parameter(Mandatory)][string]$Code,
+        [Parameter(Mandatory)][string]$Message,
+        [Parameter(Mandatory)][int]$ExitCode,
+        [hashtable]$Details = @{}
+    )
+    if ($JsonErrors) {
+        $payload = @{
+            error = @{
+                code             = $Code
+                message          = $Message
+                exitCode         = $ExitCode
+                requestedVersion = $Version
+                script           = "release-version.ps1"
+                details          = $Details
+            }
+        }
+        $json = $payload | ConvertTo-Json -Depth 6 -Compress
+        [Console]::Error.WriteLine($json)
+    } else {
+        Write-Err2 "$Message [code=$Code]"
+    }
+    exit $ExitCode
+}
 
 # ---------------------------------------------------------------------------
 # Version validation
